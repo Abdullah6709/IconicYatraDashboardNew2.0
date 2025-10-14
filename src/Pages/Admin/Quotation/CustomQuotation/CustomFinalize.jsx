@@ -32,9 +32,6 @@ import {
   Person,
   LocationOn,
   CalendarToday,
-  AccessTime,
-  Route,
-  Group,
   CheckCircle,
   Cancel,
   Warning,
@@ -42,10 +39,11 @@ import {
   Language,
   ExpandMore,
   Edit,
+  Group,
   Receipt,
+  Route,
   Route as RouteIcon,
   Visibility,
-  Hotel as HotelIcon,
   AddCircleOutline,
   Image as ImageIcon,
   FormatQuote,
@@ -53,71 +51,67 @@ import {
 
 import EmailQuotationDialog from "../VehicleQuotation/Dialog/EmailQuotationDialog";
 import MakePaymentDialog from "../VehicleQuotation/Dialog/MakePaymentDialog";
-import FinalizeDialog from "../VehicleQuotation/Dialog/FinalizeDialog";
-import BankDetailsDialog from "../VehicleQuotation/Dialog/BankDetailsDialog";
+import FinalizeDialog from "./Dialog/FinalizeDialog";
+import HotelVendorDialog from "./Dialog/HotelVendor";
 import AddBankDialog from "../VehicleQuotation/Dialog/AddBankDialog";
 import EditDialog from "../VehicleQuotation/Dialog/EditDialog";
 import AddServiceDialog from "../VehicleQuotation/Dialog/AddServiceDialog";
 import AddFlightDialog from "../HotelQuotation/Dialog/FlightDialog";
 
-// Initial data separated into individual objects for better organization
-const initialCustomer = {
-  name: "Amit Jaiswal",
-  location: "Andhya Pradesh",
-  phone: "+91 7053900957",
-  email: "amit.jaiswal@example.com",
-};
-
-const initialPickupDetails = {
-  arrival: "Arrival: Lucknow (22/08/2025) at Airport, 3:35PM",
-  departure: "Departure: Delhi (06/09/2025) from Local Address, 6:36PM",
-};
-
-const initialHotelDetails = {
-  guests: "6 Adults",
-  rooms: "3 Bedroom",
-  mealPlan: "CP, AP, EP",
-  destination: "3N Borong, 2N Damthang",
-  itinerary:
-    "This is only tentative schedule for sightseeing and travel. Actual sightseeing may get affected due to weather, road conditions, local authority notices, shortage of timing, or off days.",
-};
-
-const initialVehicle = [
-  {
-    pickup: { date: "22/08/2025", time: "3:35PM" },
-    drop: { date: "06/09/2025", time: "6:36PM" },
+// Initial data
+const initialData = {
+  customer: {
+    name: "Amit Jaiswal",
+    location: "Andhya Pradesh",
+    phone: "+91 7053900957",
+    email: "amit.jaiswal@example.com",
   },
-];
-
-const initialPricing = {
-  discount: "₹ 200",
-  gst: "₹ 140",
-  total: "₹ 3,340",
-};
-
-const initialPolicies = {
-  inclusions: [
-    "All transfers tours in a Private AC cab.",
-    "Parking, Toll charges, Fuel and Driver expenses.",
-    "Hotel Taxes.",
-    "Car AC off during hill stations.",
+  pickup: {
+    arrival: "Arrival: Lucknow (22/08/2025) at Airport, 3:35PM",
+    departure: "Departure: Delhi (06/09/2025) from Local Address, 6:36PM",
+  },
+  hotel: {
+    guests: "6 Adults",
+    rooms: "3 Bedroom",
+    mealPlan: "CP, AP, EP",
+    destination: "3N Borong, 2N Damthang",
+    itinerary: "This is only tentative schedule for sightseeing and travel...",
+  },
+  vehicles: [
+    {
+      pickup: { date: "22/08/2025", time: "3:35PM" },
+      drop: { date: "06/09/2025", time: "6:36PM" },
+    },
   ],
-  exclusions: "1. Any Cost change... (rest of exclusions)",
-  paymentPolicy: "50% amount to pay at confirmation, balance before 10 days.",
-  cancellationPolicy: "1. Before 15 days: 50%. 2. Within 7 days: 100%.",
-  terms:
-    "1. This is only a Quote. Availability is checked only on confirmation...",
-};
-
-const initialFooter = {
-  contact: "Amit Jaiswal | +91 7053900957 (Noida)",
-  phone: "+91 7053900957",
-  email: "amit.jaiswal@example.com",
-  received: "₹ 1,500",
-  balance: "₹ 1,840",
-  company: "Iconic Yatra",
-  address: "Office No 15, Bhawani Market Sec 27, Noida, Uttar Pradesh – 201301",
-  website: "https://www.iconicyatra.com",
+  pricing: {
+    discount: "₹ 200",
+    gst: "₹ 140",
+    total: "₹ 3,340",
+  },
+  policies: {
+    inclusions: [
+      "All transfers tours in a Private AC cab.",
+      "Parking, Toll charges, Fuel and Driver expenses.",
+      "Hotel Taxes.",
+      "Car AC off during hill stations.",
+    ],
+    exclusions: "1. Any Cost change...",
+    paymentPolicy: "50% amount to pay at confirmation, balance before 10 days.",
+    cancellationPolicy: "1. Before 15 days: 50%. 2. Within 7 days: 100%.",
+    terms:
+      "1. This is only a Quote. Availability is checked only on confirmation...",
+  },
+  footer: {
+    contact: "Amit Jaiswal | +91 7053900957 (Noida)",
+    phone: "+91 7053900957",
+    email: "amit.jaiswal@example.com",
+    received: "₹ 1,500",
+    balance: "₹ 1,840",
+    company: "Iconic Yatra",
+    address:
+      "Office No 15, Bhawani Market Sec 27, Noida, Uttar Pradesh – 201301",
+    website: "https://www.iconicyatra.com",
+  },
 };
 
 const initialActions = [
@@ -126,10 +120,13 @@ const initialActions = [
   "Email Quotation",
   "Preview PDF",
   "Make Payment",
-  "Add Flight", // Add this line
+  "Add Flight",
 ];
-
-// Hotel pricing table data
+const taxOptions = [
+  { value: "gst5", label: "GST 5%", rate: 5 },
+  { value: "gst18", label: "GST 18%", rate: 18 },
+  { value: "non", label: "Non", rate: 0 },
+];
 const hotelPricingData = [
   {
     destination: "Borong",
@@ -168,33 +165,19 @@ const hotelPricingData = [
   },
 ];
 
-const taxOptions = [
-  { value: "gst5", label: "GST 5%", rate: 5 },
-  { value: "gst18", label: "GST 18%", rate: 18 },
-  { value: "non", label: "Non", rate: 0 },
-];
-
 const CustomFinalize = () => {
-  // State management
+  // State
   const [activeInfo, setActiveInfo] = useState(null);
   const [openFinalize, setOpenFinalize] = useState(false);
   const [vendor, setVendor] = useState("");
   const [isFinalized, setIsFinalized] = useState(false);
   const [invoiceGenerated, setInvoiceGenerated] = useState(false);
-
-  // Data state
   const [quotation, setQuotation] = useState({
     date: "27/08/2025",
     reference: "41",
     actions: initialActions,
-    customer: initialCustomer,
-    pickup: initialPickupDetails,
-    hotel: initialHotelDetails,
-    vehicles: initialVehicle,
-    pricing: initialPricing,
-    policies: initialPolicies,
-    footer: initialFooter,
     bannerImage: "",
+    ...initialData,
   });
 
   // Dialog states
@@ -206,7 +189,6 @@ const CustomFinalize = () => {
     nested: false,
     nestedKey: "",
   });
-
   const [openAddService, setOpenAddService] = useState(false);
   const [services, setServices] = useState([]);
   const [currentService, setCurrentService] = useState({
@@ -215,12 +197,12 @@ const CustomFinalize = () => {
     amount: "",
     taxType: "",
   });
-
   const [openEmailDialog, setOpenEmailDialog] = useState(false);
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
   const [openBankDialog, setOpenBankDialog] = useState(false);
   const [openAddFlight, setOpenAddFlight] = useState(false);
   const [flights, setFlights] = useState([]);
+  const [openAddBankDialog, setOpenAddBankDialog] = useState(false);
 
   // Bank details state
   const [accountType, setAccountType] = useState("company");
@@ -229,8 +211,6 @@ const CustomFinalize = () => {
   const [ifscCode, setIfscCode] = useState("");
   const [bankName, setBankName] = useState("");
   const [branchName, setBranchName] = useState("");
-
-  const [openAddBankDialog, setOpenAddBankDialog] = useState(false);
   const [newBankDetails, setNewBankDetails] = useState({
     bankName: "",
     branchName: "",
@@ -239,14 +219,13 @@ const CustomFinalize = () => {
     ifscCode: "",
     openingBalance: "",
   });
-
   const [accountOptions, setAccountOptions] = useState([
     { value: "Cash", label: "Cash" },
     { value: "KOTAK Bank", label: "KOTAK Bank" },
     { value: "YES Bank", label: "YES Bank" },
   ]);
 
-  // Helper functions
+  // Handlers
   const handleEditOpen = (
     field,
     value,
@@ -269,25 +248,16 @@ const CustomFinalize = () => {
   };
 
   const handleEditSave = () => {
-    if (editDialog.nested) {
-      setQuotation((prev) => ({
-        ...prev,
-        [editDialog.field]: {
-          ...prev[editDialog.field],
-          [editDialog.nestedKey]: editDialog.value,
-        },
-      }));
-    } else {
-      setQuotation((prev) => ({
-        ...prev,
-        [editDialog.field]: editDialog.value,
-      }));
-    }
+    setQuotation((prev) => ({
+      ...prev,
+      [editDialog.field]: editDialog.nested
+        ? {
+            ...prev[editDialog.field],
+            [editDialog.nestedKey]: editDialog.value,
+          }
+        : editDialog.value,
+    }));
     handleEditClose();
-  };
-
-  const handleEditValueChange = (e) => {
-    setEditDialog({ ...editDialog, value: e.target.value });
   };
 
   const handleConfirm = () => {
@@ -319,29 +289,6 @@ const CustomFinalize = () => {
     handleBankDialogClose();
   };
 
-  const handleAddBankOpen = () => {
-    setOpenAddBankDialog(true);
-  };
-
-  const handleAddBankClose = () => {
-    setOpenAddBankDialog(false);
-    setNewBankDetails({
-      bankName: "",
-      branchName: "",
-      accountHolderName: "",
-      accountNumber: "",
-      ifscCode: "",
-      openingBalance: "",
-    });
-  }; 
- 
-  const handleNewBankChange = (field, value) => {
-    setNewBankDetails((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
   const handleAddBank = () => {
     if (
       !newBankDetails.bankName ||
@@ -359,14 +306,15 @@ const CustomFinalize = () => {
 
     setAccountOptions((prev) => [...prev, newAccount]);
     setAccountName(newAccount.value);
-    handleAddBankClose();
-  };
-
-  const handleServiceChange = (field, value) => {     
-    setCurrentService((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setOpenAddBankDialog(false);
+    setNewBankDetails({
+      bankName: "",
+      branchName: "",
+      accountHolderName: "",
+      accountNumber: "",
+      ifscCode: "",
+      openingBalance: "",
+    });
   };
 
   const handleAddService = () => {
@@ -382,7 +330,6 @@ const CustomFinalize = () => {
       (option) => option.value === currentService.taxType
     );
     const taxRate = selectedTax ? selectedTax.rate : 0;
-
     const amount =
       currentService.included === "yes" ? 0 : parseFloat(currentService.amount);
     const taxAmount = amount * (taxRate / 100) || 0;
@@ -390,7 +337,7 @@ const CustomFinalize = () => {
     const newService = {
       ...currentService,
       id: Date.now(),
-      amount: amount,
+      amount,
       taxRate,
       taxAmount,
       totalAmount: amount + taxAmount,
@@ -406,59 +353,16 @@ const CustomFinalize = () => {
     });
   };
 
-  const handleClearService = () => {
-    setCurrentService({
-      included: "yes",
-      particulars: "",
-      amount: "",
-      taxType: "",
-    });
-  };
-
   const handleRemoveService = (id) => {
     setServices((prev) => prev.filter((service) => service.id !== id));
   };
 
-  const handleSaveServices = () => {
-    console.log("Services saved:", services);
-    setOpenAddService(false);
-  };
-
-  const handleGenerateInvoice = () => {
-    console.log("Generate Invoice clicked");
-    setOpenBankDialog(true);
-  };
-
-  const handleViewInvoice = () => {
-    console.log("View Invoice clicked");
-  };
-
-  const handleAddServiceOpen = () => setOpenAddService(true);
-  const handleAddServiceClose = () => {
-    setOpenAddService(false);
-    setCurrentService({
-      included: "yes",
-      particulars: "",
-      amount: "",
-      taxType: "",
-    });
-  };
-  const handleEmailOpen = () => setOpenEmailDialog(true);
-  const handleEmailClose = () => setOpenEmailDialog(false);
-  const handlePaymentOpen = () => setOpenPaymentDialog(true);
-  const handlePaymentClose = () => setOpenPaymentDialog(false);
-  const handleFinalizeOpen = () => setOpenFinalize(true);
-  const handleFinalizeClose = () => setOpenFinalize(false);
-
-  // Add flight handlers
-  const handleAddFlightOpen = () => setOpenAddFlight(true);
-  const handleAddFlightClose = () => setOpenAddFlight(false);
   const handleAddFlight = (flightDetails) => {
     setFlights((prev) => [...prev, { ...flightDetails, id: Date.now() }]);
     console.log("Flight added:", flightDetails);
   };
 
-  // Constants for UI rendering
+  // UI Data
   const infoMap = {
     call: `📞 ${quotation.footer.phone}`,
     email: `✉️ ${quotation.footer.email}`,
@@ -543,26 +447,18 @@ const CustomFinalize = () => {
     },
   ];
 
-  const hotelTableHeaders = [
-    "Destination",
-    "Nights",
-    "Standard",
-    "Deluxe",
-    "Superior",
-  ];
-
-  // Action handlers
   const actionHandlers = {
-    Finalize: handleFinalizeOpen,
-    "Add Service": handleAddServiceOpen,
-    "Email Quotation": handleEmailOpen,
+    Finalize: () => setOpenFinalize(true),
+    "Add Service": () => setOpenAddService(true),
+    "Email Quotation": () => setOpenEmailDialog(true),
     "Preview PDF": () => console.log("Preview PDF clicked"),
-    "Make Payment": handlePaymentOpen,
-    "Add Flight": handleAddFlightOpen, // Add this line
+    "Make Payment": () => setOpenPaymentDialog(true),
+    "Add Flight": () => setOpenAddFlight(true),
   };
 
   return (
     <Box>
+      {/* Action Buttons */}
       <Box
         display="flex"
         justifyContent="flex-end"
@@ -570,33 +466,29 @@ const CustomFinalize = () => {
         mb={2}
         flexWrap="wrap"
       >
-        {quotation.actions.map((a, i) => {
-          if (a === "Finalize" && isFinalized) return null;
-
-          return (
+        {quotation.actions.map((a, i) =>
+          a === "Finalize" && isFinalized ? null : (
             <Button key={i} variant="contained" onClick={actionHandlers[a]}>
               {a}
             </Button>
-          );
-        })}
-
+          )
+        )}
         {isFinalized && !invoiceGenerated && (
           <Button
             variant="contained"
             color="success"
             startIcon={<Receipt />}
-            onClick={handleGenerateInvoice}
+            onClick={() => setOpenBankDialog(true)}
           >
             Generate Invoice
           </Button>
         )}
-
         {invoiceGenerated && (
           <Button
             variant="contained"
             color="info"
             startIcon={<Visibility />}
-            onClick={handleViewInvoice}
+            onClick={() => console.log("View Invoice clicked")}
           >
             View Invoice
           </Button>
@@ -604,6 +496,7 @@ const CustomFinalize = () => {
       </Box>
 
       <Grid container spacing={2}>
+        {/* Sidebar */}
         <Grid
           size={{ xs: 12, md: 3 }}
           sx={{
@@ -681,6 +574,7 @@ const CustomFinalize = () => {
           </Box>
         </Grid>
 
+        {/* Main Content */}
         <Grid size={{ xs: 12, md: 9 }}>
           <Card>
             <CardContent>
@@ -695,7 +589,6 @@ const CustomFinalize = () => {
                     Date: {quotation.date}
                   </Typography>
                 </Box>
-
                 {isFinalized && (
                   <Typography
                     variant="h6"
@@ -716,6 +609,7 @@ const CustomFinalize = () => {
                   Ref: {quotation.reference}
                 </Typography>
               </Box>
+
               <Box display="flex" alignItems="center" mt={2}>
                 <Person sx={{ fontSize: 18, mr: 0.5 }} />
                 <Typography variant="subtitle1" fontWeight="bold">
@@ -723,6 +617,7 @@ const CustomFinalize = () => {
                 </Typography>
               </Box>
 
+              {/* Pickup/Drop Details */}
               <Box
                 mt={2}
                 p={2}
@@ -742,7 +637,7 @@ const CustomFinalize = () => {
                     sx={{ fontSize: "0.875rem" }}
                   >
                     <RouteIcon sx={{ mr: 0.5 }} />
-                   Pickup/Drop Details
+                    Pickup/Drop Details
                   </Typography>
                 </Box>
                 {pickupDetails.map((i, k) => (
@@ -771,6 +666,7 @@ const CustomFinalize = () => {
                 ))}
               </Box>
 
+              {/* Quotation Details */}
               <Box mt={3}>
                 <Box display="flex" alignItems="center">
                   <FormatQuoteIcon sx={{ mr: 1 }} />
@@ -782,12 +678,14 @@ const CustomFinalize = () => {
                     Custom Quotation For {quotation.customer.name}
                   </Typography>
                 </Box>
+
                 <Box display="flex" alignItems="center" mt={1}>
                   <Route sx={{ mr: 0.5 }} />
                   <Typography variant="subtitle2">
                     Destination : {quotation.hotel.destination}
                   </Typography>
                 </Box>
+
                 <Box display="flex" alignItems="center" mt={1}>
                   <ImageIcon sx={{ mr: 0.5 }} />
                   <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
@@ -802,13 +700,10 @@ const CustomFinalize = () => {
                       onChange={(e) => {
                         const file = e.target.files[0];
                         if (file) {
-                          // Set the file name to display
                           setQuotation((prev) => ({
                             ...prev,
                             bannerImage: file.name,
                           }));
-
-                          // You can also handle the file upload here
                           console.log("Selected file:", file);
                         }
                       }}
@@ -824,6 +719,7 @@ const CustomFinalize = () => {
                   )}
                 </Box>
 
+                {/* Itinerary */}
                 <Box display="flex" flexDirection="column" mt={2}>
                   <Box display="flex" alignItems="center" mb={1}>
                     <Warning sx={{ mr: 1, color: "warning.main" }} />
@@ -835,7 +731,6 @@ const CustomFinalize = () => {
                       Day Wise Itinerary
                     </Typography>
                   </Box>
-
                   <Box
                     display="flex"
                     alignItems="center"
@@ -860,6 +755,7 @@ const CustomFinalize = () => {
                 </Box>
               </Box>
 
+              {/* Quotation Details */}
               <Box display="flex" flexDirection="column" mt={2}>
                 <Box display="flex" alignItems="center" mb={1}>
                   <FormatQuote sx={{ mr: 1, color: "warning.main" }} />
@@ -871,7 +767,6 @@ const CustomFinalize = () => {
                     Quotation Details
                   </Typography>
                 </Box>
-
                 <Box>
                   <Typography variant="body2" sx={{ flex: 1, mr: 2 }}>
                     No of Guest : {quotation.hotel.guests}
@@ -891,7 +786,13 @@ const CustomFinalize = () => {
                   <Table>
                     <TableHead sx={{ backgroundColor: "primary.light" }}>
                       <TableRow>
-                        {hotelTableHeaders.map((h) => (
+                        {[
+                          "Destination",
+                          "Nights",
+                          "Standard",
+                          "Deluxe",
+                          "Superior",
+                        ].map((h) => (
                           <TableCell
                             key={h}
                             sx={{ color: "white", fontWeight: "bold" }}
@@ -928,10 +829,11 @@ const CustomFinalize = () => {
                 </TableContainer>
               </Box>
 
+              {/* Policies */}
               <Grid container spacing={2} mt={1}>
                 {Policies.map((p, i) => (
                   <Grid size={{ xs: 12 }} key={i}>
-                    <Card variant="outlined"> 
+                    <Card variant="outlined">
                       <CardContent>
                         <Box
                           display="flex"
@@ -970,6 +872,7 @@ const CustomFinalize = () => {
                 ))}
               </Grid>
 
+              {/* Terms & Conditions */}
               <Box mt={2}>
                 <Card variant="outlined">
                   <CardContent>
@@ -1008,6 +911,7 @@ const CustomFinalize = () => {
                 </Card>
               </Box>
 
+              {/* Footer */}
               <Box
                 mt={4}
                 p={2}
@@ -1076,13 +980,12 @@ const CustomFinalize = () => {
       {/* Dialogs */}
       <FinalizeDialog
         open={openFinalize}
-        onClose={handleFinalizeClose}
+        onClose={() => setOpenFinalize(false)}
         vendor={vendor}
         setVendor={setVendor}
         onConfirm={handleConfirm}
       />
-
-      <BankDetailsDialog
+      <HotelVendorDialog
         open={openBankDialog}
         onClose={handleBankDialogClose}
         accountType={accountType}
@@ -1090,55 +993,83 @@ const CustomFinalize = () => {
         accountName={accountName}
         setAccountName={setAccountName}
         accountOptions={accountOptions}
-        onAddBankOpen={handleAddBankOpen}
+        onAddBankOpen={() => setOpenAddBankDialog(true)}
         onConfirm={handleBankConfirm}
       />
-
       <AddBankDialog
         open={openAddBankDialog}
-        onClose={handleAddBankClose}
+        onClose={() => {
+          setOpenAddBankDialog(false);
+          setNewBankDetails({
+            bankName: "",
+            branchName: "",
+            accountHolderName: "",
+            accountNumber: "",
+            ifscCode: "",
+            openingBalance: "",
+          });
+        }}
         newBankDetails={newBankDetails}
-        onNewBankChange={handleNewBankChange}
+        onNewBankChange={(field, value) =>
+          setNewBankDetails((prev) => ({ ...prev, [field]: value }))
+        }
         onAddBank={handleAddBank}
       />
-
       <EditDialog
         open={editDialog.open}
         onClose={handleEditClose}
         title={editDialog.title}
         value={editDialog.value}
-        onValueChange={handleEditValueChange}
+        onValueChange={(e) =>
+          setEditDialog((prev) => ({ ...prev, value: e.target.value }))
+        }
         onSave={handleEditSave}
       />
-
       <AddServiceDialog
         open={openAddService}
-        onClose={handleAddServiceClose}
+        onClose={() => {
+          setOpenAddService(false);
+          setCurrentService({
+            included: "yes",
+            particulars: "",
+            amount: "",
+            taxType: "",
+          });
+        }}
         currentService={currentService}
-        onServiceChange={handleServiceChange}
+        onServiceChange={(field, value) =>
+          setCurrentService((prev) => ({ ...prev, [field]: value }))
+        }
         services={services}
         onAddService={handleAddService}
-        onClearService={handleClearService}
+        onClearService={() =>
+          setCurrentService({
+            included: "yes",
+            particulars: "",
+            amount: "",
+            taxType: "",
+          })
+        }
         onRemoveService={handleRemoveService}
-        onSaveServices={handleSaveServices}
+        onSaveServices={() => {
+          console.log("Services saved:", services);
+          setOpenAddService(false);
+        }}
         taxOptions={taxOptions}
       />
-
-      <AddFlightDialog // Add this dialog
+      <AddFlightDialog
         open={openAddFlight}
-        onClose={handleAddFlightClose}
+        onClose={() => setOpenAddFlight(false)}
         onSave={handleAddFlight}
       />
-
       <EmailQuotationDialog
         open={openEmailDialog}
-        onClose={handleEmailClose}
+        onClose={() => setOpenEmailDialog(false)}
         customer={quotation.customer}
       />
-
       <MakePaymentDialog
         open={openPaymentDialog}
-        onClose={handlePaymentClose}
+        onClose={() => setOpenPaymentDialog(false)}
       />
     </Box>
   );
