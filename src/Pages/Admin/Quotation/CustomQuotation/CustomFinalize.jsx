@@ -21,6 +21,14 @@ import {
   AccordionSummary,
   AccordionDetails,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Pagination,
+  Select,
+  MenuItem,
+  FormControl,
+  Divider,
 } from "@mui/material";
 import {
   FormatQuote as FormatQuoteIcon,
@@ -47,6 +55,7 @@ import {
   AddCircleOutline,
   Image as ImageIcon,
   FormatQuote,
+  Delete,
 } from "@mui/icons-material";
 
 import EmailQuotationDialog from "../VehicleQuotation/Dialog/EmailQuotationDialog";
@@ -58,7 +67,124 @@ import EditDialog from "../VehicleQuotation/Dialog/EditDialog";
 import AddServiceDialog from "../VehicleQuotation/Dialog/AddServiceDialog";
 import AddFlightDialog from "../HotelQuotation/Dialog/FlightDialog";
 
-// Initial data
+// Transaction Summary Dialog Component
+const TransactionSummaryDialog = ({ open, onClose }) => {
+  const tableHeaders = [
+    "Sr No.",
+    "Receipt",
+    "Invoice",
+    "Party Name",
+    "Transaction Remark",
+    "Transaction...",
+    "Dr/Cr",
+    "Amount",
+  ];
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
+      fullWidth
+      PaperProps={{ sx: { minHeight: "400px" } }}
+    >
+      <DialogTitle>
+        <Typography variant="h6" component="div" fontWeight="bold">
+          Transaction Summary
+        </Typography>
+      </DialogTitle>
+      <DialogContent>
+        <TableContainer
+          component={Paper}
+          variant="outlined"
+          sx={{ border: "1px solid #e0e0e0" }}
+        >
+          <Table sx={{ minWidth: 800 }} aria-label="transaction summary table">
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                {tableHeaders.map((header, index) => (
+                  <TableCell
+                    key={index}
+                    sx={{
+                      fontWeight: "bold",
+                      borderRight:
+                        index < tableHeaders.length - 1
+                          ? "1px solid #e0e0e0"
+                          : "none",
+                    }}
+                  >
+                    {header}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell
+                  colSpan={tableHeaders.length}
+                  align="center"
+                  sx={{
+                    height: 120,
+                    color: "text.secondary",
+                    fontStyle: "italic",
+                  }}
+                >
+                  No data
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <Box
+          sx={{
+            mt: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Page 1 of 1 (0 items)
+          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <FormControl size="small" variant="outlined">
+              <Select value={50} size="small" sx={{ minWidth: 80 }} disabled>
+                <MenuItem value={50}>50</MenuItem>
+                <MenuItem value={100}>100</MenuItem>
+                <MenuItem value={200}>200</MenuItem>
+              </Select>
+            </FormControl>
+            <Divider orientation="vertical" flexItem />
+            <Pagination
+              count={1}
+              page={1}
+              color="primary"
+              size="small"
+              disabled
+            />
+          </Box>
+        </Box>
+
+        <Box
+          sx={{ mt: 1, display: "flex", justifyContent: "flex-end", gap: 1 }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            50
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            100
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            200
+          </Typography>
+        </Box>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Constants
 const initialData = {
   customer: {
     name: "Amit Jaiswal",
@@ -83,11 +209,7 @@ const initialData = {
       drop: { date: "06/09/2025", time: "6:36PM" },
     },
   ],
-  pricing: {
-    discount: "₹ 200",
-    gst: "₹ 140",
-    total: "₹ 3,340",
-  },
+  pricing: { discount: "₹ 200", gst: "₹ 140", total: "₹ 3,340" },
   policies: {
     inclusions: [
       "All transfers tours in a Private AC cab.",
@@ -175,12 +297,10 @@ const CustomFinalize = () => {
   const [quotation, setQuotation] = useState({
     date: "27/08/2025",
     reference: "41",
-    actions: initialActions,
+    actions: [...initialActions, "Transaction"],
     bannerImage: "",
     ...initialData,
   });
-
-  // Dialog states
   const [editDialog, setEditDialog] = useState({
     open: false,
     field: "",
@@ -203,8 +323,10 @@ const CustomFinalize = () => {
   const [openAddFlight, setOpenAddFlight] = useState(false);
   const [flights, setFlights] = useState([]);
   const [openAddBankDialog, setOpenAddBankDialog] = useState(false);
-
-  // Bank details state
+  const [openTransactionDialog, setOpenTransactionDialog] = useState(false);
+  const [days, setDays] = useState([
+    { id: 1, date: "11/09/2025", title: "About Day 1", image: null },
+  ]);
   const [accountType, setAccountType] = useState("company");
   const [accountName, setAccountName] = useState("Iconic Yatra");
   const [accountNumber, setAccountNumber] = useState("");
@@ -298,12 +420,10 @@ const CustomFinalize = () => {
       alert("Please fill in all required fields");
       return;
     }
-
     const newAccount = {
       value: newBankDetails.bankName,
       label: `${newBankDetails.bankName} - ${newBankDetails.accountHolderName}`,
     };
-
     setAccountOptions((prev) => [...prev, newAccount]);
     setAccountName(newAccount.value);
     setOpenAddBankDialog(false);
@@ -325,7 +445,6 @@ const CustomFinalize = () => {
       alert("Please fill in all required fields");
       return;
     }
-
     const selectedTax = taxOptions.find(
       (option) => option.value === currentService.taxType
     );
@@ -333,7 +452,6 @@ const CustomFinalize = () => {
     const amount =
       currentService.included === "yes" ? 0 : parseFloat(currentService.amount);
     const taxAmount = amount * (taxRate / 100) || 0;
-
     const newService = {
       ...currentService,
       id: Date.now(),
@@ -341,9 +459,8 @@ const CustomFinalize = () => {
       taxRate,
       taxAmount,
       totalAmount: amount + taxAmount,
-      taxLabel: selectedTax ? selectedTax.label : "Non",
+      taxLabel: selectedTax ? selectedTax.label : "Non", 
     };
-
     setServices((prev) => [...prev, newService]);
     setCurrentService({
       included: "yes",
@@ -360,6 +477,47 @@ const CustomFinalize = () => {
   const handleAddFlight = (flightDetails) => {
     setFlights((prev) => [...prev, { ...flightDetails, id: Date.now() }]);
     console.log("Flight added:", flightDetails);
+  };
+
+  const handleDayImageUpload = (dayId, file) => {
+    if (file) {
+      setDays((prev) =>
+        prev.map((day) =>
+          day.id === dayId
+            ? {
+                ...day,
+                image: {
+                  file,
+                  preview: URL.createObjectURL(file),
+                  name: file.name,
+                },
+              }
+            : day
+        )
+      );
+      console.log(`Image uploaded for Day ${dayId}:`, file.name);
+    }
+  };
+
+  const handleAddDay = () => {
+    const newDayId = days.length + 1;
+    setDays((prev) => [
+      ...prev,
+      {
+        id: newDayId,
+        date: "12/09/2025",
+        title: `About Day ${newDayId}`,
+        image: null,
+      },
+    ]);
+  };
+
+  const handleRemoveDay = (dayId) => {
+    if (days.length > 1) {
+      setDays((prev) => prev.filter((day) => day.id !== dayId));
+    } else {
+      alert("At least one day is required");
+    }
   };
 
   // UI Data
@@ -454,6 +612,7 @@ const CustomFinalize = () => {
     "Preview PDF": () => console.log("Preview PDF clicked"),
     "Make Payment": () => setOpenPaymentDialog(true),
     "Add Flight": () => setOpenAddFlight(true),
+    Transaction: () => setOpenTransactionDialog(true),
   };
 
   return (
@@ -466,19 +625,23 @@ const CustomFinalize = () => {
         mb={2}
         flexWrap="wrap"
       >
-        {quotation.actions.map((a, i) =>
-          a === "Finalize" && isFinalized ? null : (
+        {quotation.actions
+          .filter(
+            (a) =>
+              !(a === "Finalize" && isFinalized) &&
+              !(a === "Transaction" && !isFinalized)
+          )
+          .map((a, i) => (
             <Button key={i} variant="contained" onClick={actionHandlers[a]}>
               {a}
             </Button>
-          )
-        )}
+          ))}
         {isFinalized && !invoiceGenerated && (
           <Button
             variant="contained"
             color="success"
             startIcon={<Receipt />}
-            onClick={() => setOpenBankDialog(true)}
+            onClick={() => console.log("Preview PDF clicked")}
           >
             Generate Invoice
           </Button>
@@ -752,6 +915,98 @@ const CustomFinalize = () => {
                       <Edit fontSize="small" />
                     </IconButton>
                   </Box>
+                </Box>
+
+                {/* Days Sections */}
+                {days.map((day) => (
+                  <Box
+                    key={day.id}
+                    mt={3}
+                    p={2}
+                    sx={{ border: "1px solid #e0e0e0", borderRadius: 1 }}
+                  >
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      mb={2}
+                    >
+                      <Typography variant="h6" fontWeight="bold">
+                        Day {day.id} ({day.date}) : {day.title}
+                      </Typography>
+                      {days.length > 1 && (
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleRemoveDay(day.id)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      )}
+                    </Box>
+
+                    <Box display="flex" alignItems="center" gap={2} mb={2}>
+                      <ImageIcon sx={{ color: "primary.main" }} />
+                      <Typography variant="body1">Add Image</Typography>
+                      <Button
+                        component="label"
+                        variant="outlined"
+                        size="small"
+                        startIcon={<AddCircleOutline />}
+                      >
+                        Upload Image
+                        <input
+                          type="file"
+                          hidden
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleDayImageUpload(day.id, e.target.files[0])
+                          }
+                        />
+                      </Button>
+                    </Box>
+
+                    {day.image && (
+                      <Box mt={2} display="flex" alignItems="center" gap={2}>
+                        <Box
+                          component="img"
+                          src={day.image.preview}
+                          alt={`Day ${day.id}`}
+                          sx={{
+                            width: 100,
+                            height: 100,
+                            objectFit: "cover",
+                            borderRadius: 1,
+                            border: "1px solid #e0e0e0",
+                          }}
+                        />
+                        <Box>
+                          <Typography variant="body2" fontWeight="medium">
+                            {day.image.name}
+                          </Typography>
+                          <Button
+                            size="small"
+                            color="error"
+                            onClick={() => handleDayImageUpload(day.id, null)}
+                          >
+                            Remove
+                          </Button>
+                        </Box>
+                      </Box>
+                    )}
+                  </Box>
+                ))}
+
+                {/* Add More Day Button */}
+                <Box mt={2} display="flex" justifyContent="center">
+                  <Button
+                    variant="outlined"
+                    startIcon={<AddCircleOutline />}
+                    onClick={handleAddDay}
+                    sx={{ textTransform: "none" }}
+                  >
+                    Add More Day
+                  </Button>
                 </Box>
               </Box>
 
@@ -1070,6 +1325,10 @@ const CustomFinalize = () => {
       <MakePaymentDialog
         open={openPaymentDialog}
         onClose={() => setOpenPaymentDialog(false)}
+      />
+      <TransactionSummaryDialog
+        open={openTransactionDialog}
+        onClose={() => setOpenTransactionDialog(false)}
       />
     </Box>
   );
