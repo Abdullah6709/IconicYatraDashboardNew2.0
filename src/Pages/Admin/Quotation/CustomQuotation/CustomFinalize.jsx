@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -6,10 +6,15 @@ import {
   Button,
   Card,
   CardContent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Table,
   TableBody,
   TableCell,
   TableContainer,
+  TextField,
   TableHead,
   TableRow,
   Paper,
@@ -21,14 +26,9 @@ import {
   AccordionSummary,
   AccordionDetails,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Pagination,
-  Select,
-  MenuItem,
-  FormControl,
-  Divider,
+  CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
   FormatQuote as FormatQuoteIcon,
@@ -56,6 +56,7 @@ import {
   Image as ImageIcon,
   FormatQuote,
   Delete,
+  Add,
 } from "@mui/icons-material";
 
 import EmailQuotationDialog from "../VehicleQuotation/Dialog/EmailQuotationDialog";
@@ -135,172 +136,86 @@ const TransactionSummaryDialog = ({ open, onClose }) => {
             </TableBody>
           </Table>
         </TableContainer>
-
-        <Box
-          sx={{
-            mt: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            Page 1 of 1 (0 items)
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <FormControl size="small" variant="outlined">
-              <Select value={50} size="small" sx={{ minWidth: 80 }} disabled>
-                <MenuItem value={50}>50</MenuItem>
-                <MenuItem value={100}>100</MenuItem>
-                <MenuItem value={200}>200</MenuItem>
-              </Select>
-            </FormControl>
-            <Divider orientation="vertical" flexItem />
-            <Pagination
-              count={1}
-              page={1}
-              color="primary"
-              size="small"
-              disabled
-            />
-          </Box>
-        </Box>
-
-        <Box
-          sx={{ mt: 1, display: "flex", justifyContent: "flex-end", gap: 1 }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            50
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            100
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            200
-          </Typography>
-        </Box>
       </DialogContent>
     </Dialog>
   );
 };
 
-// Constants
-const initialData = {
-  customer: {
-    name: "Amit Jaiswal",
-    location: "Andhya Pradesh",
-    phone: "+91 7053900957",
-    email: "amit.jaiswal@example.com",
-  },
-  pickup: {
-    arrival: "Arrival: Lucknow (22/08/2025) at Airport, 3:35PM",
-    departure: "Departure: Delhi (06/09/2025) from Local Address, 6:36PM",
-  },
-  hotel: {
-    guests: "6 Adults",
-    rooms: "3 Bedroom",
-    mealPlan: "CP, AP, EP",
-    destination: "3N Borong, 2N Damthang",
-    itinerary: "This is only tentative schedule for sightseeing and travel...",
-  },
-  vehicles: [
-    {
-      pickup: { date: "22/08/2025", time: "3:35PM" },
-      drop: { date: "06/09/2025", time: "6:36PM" },
-    },
-  ],
-  pricing: { discount: "₹ 200", gst: "₹ 140", total: "₹ 3,340" },
-  policies: {
-    inclusions: [
-      "All transfers tours in a Private AC cab.",
-      "Parking, Toll charges, Fuel and Driver expenses.",
-      "Hotel Taxes.",
-      "Car AC off during hill stations.",
-    ],
-    exclusions: "1. Any Cost change...",
-    paymentPolicy: "50% amount to pay at confirmation, balance before 10 days.",
-    cancellationPolicy: "1. Before 15 days: 50%. 2. Within 7 days: 100%.",
-    terms:
-      "1. This is only a Quote. Availability is checked only on confirmation...",
-  },
-  footer: {
-    contact: "Amit Jaiswal | +91 7053900957 (Noida)",
-    phone: "+91 7053900957",
-    email: "amit.jaiswal@example.com",
-    received: "₹ 1,500",
-    balance: "₹ 1,840",
-    company: "Iconic Yatra",
-    address:
-      "Office No 15, Bhawani Market Sec 27, Noida, Uttar Pradesh – 201301",
-    website: "https://www.iconicyatra.com",
-  },
-};
-
-const initialActions = [
-  "Finalize",
-  "Add Service",
-  "Email Quotation",
-  "Preview PDF",
-  "Make Payment",
-  "Add Flight",
-];
-const taxOptions = [
-  { value: "gst5", label: "GST 5%", rate: 5 },
-  { value: "gst18", label: "GST 18%", rate: 18 },
-  { value: "non", label: "Non", rate: 0 },
-];
-const hotelPricingData = [
-  {
-    destination: "Borong",
-    nights: "3 N",
-    standard: "Tempo Heritage Resort",
-    deluxe: "Tempo Heritage Resort",
-    superior: "Yovage The Aryan Regency",
-  },
-  {
-    destination: "Damthang",
-    nights: "2 N",
-    standard: "Tempo Heritage Resort",
-    deluxe: "Tempo Heritage Resort",
-    superior: "Yovage The Aryan Regency",
-  },
-  {
-    destination: "Quotation Cost",
-    nights: "-",
-    standard: "₹ 40,366",
-    deluxe: "₹ 440,829",
-    superior: "₹ 92,358",
-  },
-  {
-    destination: "IGST",
-    nights: "-",
-    standard: "₹ 2,018.3",
-    deluxe: "₹ 22,041.4",
-    superior: "₹ 4,617.9",
-  },
-  {
-    destination: "Total Quotation Cost",
-    nights: "5 N",
-    standard: "₹ 42,384",
-    deluxe: "₹ 462,870",
-    superior: "₹ 96,976",
-  },
-];
-
 const CustomFinalize = () => {
   // State
   const [activeInfo, setActiveInfo] = useState(null);
   const [openFinalize, setOpenFinalize] = useState(false);
+  const [openAddFlight, setOpenAddFlight] = useState(false); // Added missing state
   const [vendor, setVendor] = useState("");
   const [isFinalized, setIsFinalized] = useState(false);
   const [invoiceGenerated, setInvoiceGenerated] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success"
+  });
+  const [itineraryDialog, setItineraryDialog] = useState({
+    open: false,
+    mode: 'add',
+    day: null,
+    title: "",
+    description: "",
+    id: null
+  });
+
   const [quotation, setQuotation] = useState({
     date: "27/08/2025",
     reference: "41",
-    actions: [...initialActions, "Transaction"],
+    actions: ["Finalize", "Add Service", "Email Quotation", "Preview PDF", "Make Payment", "Add Flight", "Transaction"],
     bannerImage: "",
-    ...initialData,
+    customer: {
+      name: "Amit Jaiswal",
+      location: "Andhya Pradesh",
+      phone: "+91 7053900957",
+      email: "amit.jaiswal@example.com",
+    },
+    pickup: {
+      arrival: "Arrival: Lucknow (22/08/2025) at Airport, 3:35PM",
+      departure: "Departure: Delhi (06/09/2025) from Local Address, 6:36PM",
+    },
+    hotel: {
+      guests: "6 Adults",
+      rooms: "3 Bedroom",
+      mealPlan: "CP, AP, EP",
+      destination: "3N Borong, 2N Damthang",
+      itinerary: "This is only tentative schedule for sightseeing and travel...",
+    },
+    vehicles: [
+      {
+        pickup: { date: "22/08/2025", time: "3:35PM" },
+        drop: { date: "06/09/2025", time: "6:36PM" },
+      },
+    ],
+    pricing: { discount: "₹ 200", gst: "₹ 140", total: "₹ 3,340" },
+    policies: {
+      inclusions: [
+        "All transfers tours in a Private AC cab.",
+        "Parking, Toll charges, Fuel and Driver expenses.",
+        "Hotel Taxes.",
+        "Car AC off during hill stations.",
+      ],
+      exclusions: "1. Any Cost change...",
+      paymentPolicy: "50% amount to pay at confirmation, balance before 10 days.",
+      cancellationPolicy: "1. Before 15 days: 50%. 2. Within 7 days: 100%.",
+      terms: "1. This is only a Quote. Availability is checked only on confirmation...",
+    },
+    footer: {
+      contact: "Amit Jaiswal | +91 7053900957 (Noida)",
+      phone: "+91 7053900957",
+      email: "amit.jaiswal@example.com",
+      received: "₹ 1,500",
+      balance: "₹ 1,840",
+      company: "Iconic Yatra",
+      address: "Office No 15, Bhawani Market Sec 27, Noida, Uttar Pradesh – 201301",
+      website: "https://www.iconicyatra.com",
+    },
   });
+
   const [editDialog, setEditDialog] = useState({
     open: false,
     field: "",
@@ -320,7 +235,6 @@ const CustomFinalize = () => {
   const [openEmailDialog, setOpenEmailDialog] = useState(false);
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
   const [openBankDialog, setOpenBankDialog] = useState(false);
-  const [openAddFlight, setOpenAddFlight] = useState(false);
   const [flights, setFlights] = useState([]);
   const [openAddBankDialog, setOpenAddBankDialog] = useState(false);
   const [openTransactionDialog, setOpenTransactionDialog] = useState(false);
@@ -347,7 +261,74 @@ const CustomFinalize = () => {
     { value: "YES Bank", label: "YES Bank" },
   ]);
 
-  // Handlers
+  const taxOptions = [
+    { value: "gst5", label: "GST 5%", rate: 5 },
+    { value: "gst18", label: "GST 18%", rate: 18 },
+    { value: "non", label: "Non", rate: 0 },
+  ];
+
+  const hotelPricingData = [
+    {
+      destination: "Borong",
+      nights: "3 N",
+      standard: "Tempo Heritage Resort",
+      deluxe: "Tempo Heritage Resort",
+      superior: "Yovage The Aryan Regency",
+    },
+    {
+      destination: "Damthang",
+      nights: "2 N",
+      standard: "Tempo Heritage Resort",
+      deluxe: "Tempo Heritage Resort",
+      superior: "Yovage The Aryan Regency",
+    },
+    {
+      destination: "Quotation Cost",
+      nights: "-",
+      standard: "₹ 40,366",
+      deluxe: "₹ 440,829",
+      superior: "₹ 92,358",
+    },
+    {
+      destination: "IGST",
+      nights: "-",
+      standard: "₹ 2,018.3",
+      deluxe: "₹ 22,041.4",
+      superior: "₹ 4,617.9",
+    },
+    {
+      destination: "Total Quotation Cost",
+      nights: "5 N",
+      standard: "₹ 42,384",
+      deluxe: "₹ 462,870",
+      superior: "₹ 96,976",
+    },
+  ];
+
+  // Dialog handlers
+  const handleEmailOpen = () => setOpenEmailDialog(true);
+  const handleEmailClose = () => setOpenEmailDialog(false);
+
+  const handlePaymentOpen = () => setOpenPaymentDialog(true);
+  const handlePaymentClose = () => setOpenPaymentDialog(false);
+
+  const handleFinalizeOpen = () => setOpenFinalize(true);
+  const handleFinalizeClose = () => setOpenFinalize(false);
+
+  const handleAddServiceOpen = () => setOpenAddService(true);
+  const handleAddServiceClose = () => {
+    setOpenAddService(false);
+    setCurrentService({
+      included: "yes",
+      particulars: "",
+      amount: "",
+      taxType: "",
+    });
+  };
+
+  const handleAddFlightOpen = () => setOpenAddFlight(true);
+  const handleAddFlightClose = () => setOpenAddFlight(false);
+
   const handleEditOpen = (
     field,
     value,
@@ -382,6 +363,10 @@ const CustomFinalize = () => {
     handleEditClose();
   };
 
+  const handleEditValueChange = (e) => {
+    setEditDialog({ ...editDialog, value: e.target.value });
+  };
+
   const handleConfirm = () => {
     setIsFinalized(true);
     setOpenFinalize(false);
@@ -411,21 +396,12 @@ const CustomFinalize = () => {
     handleBankDialogClose();
   };
 
-  const handleAddBank = () => {
-    if (
-      !newBankDetails.bankName ||
-      !newBankDetails.accountHolderName ||
-      !newBankDetails.accountNumber
-    ) {
-      alert("Please fill in all required fields");
-      return;
-    }
-    const newAccount = {
-      value: newBankDetails.bankName,
-      label: `${newBankDetails.bankName} - ${newBankDetails.accountHolderName}`,
-    };
-    setAccountOptions((prev) => [...prev, newAccount]);
-    setAccountName(newAccount.value);
+  // Add New Bank Functions
+  const handleAddBankOpen = () => {
+    setOpenAddBankDialog(true);
+  };
+
+  const handleAddBankClose = () => {
     setOpenAddBankDialog(false);
     setNewBankDetails({
       bankName: "",
@@ -437,6 +413,41 @@ const CustomFinalize = () => {
     });
   };
 
+  const handleNewBankChange = (field, value) => {
+    setNewBankDetails((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleAddBank = () => {
+    if (
+      !newBankDetails.bankName ||
+      !newBankDetails.accountHolderName ||
+      !newBankDetails.accountNumber
+    ) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    const newAccount = {
+      value: newBankDetails.bankName,
+      label: `${newBankDetails.bankName} - ${newBankDetails.accountHolderName}`,
+    };
+
+    setAccountOptions((prev) => [...prev, newAccount]);
+    setAccountName(newAccount.value);
+    handleAddBankClose();
+  };
+
+  // Add Service Functions
+  const handleServiceChange = (field, value) => {
+    setCurrentService((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
   const handleAddService = () => {
     if (
       !currentService.particulars ||
@@ -445,23 +456,36 @@ const CustomFinalize = () => {
       alert("Please fill in all required fields");
       return;
     }
+
     const selectedTax = taxOptions.find(
       (option) => option.value === currentService.taxType
     );
     const taxRate = selectedTax ? selectedTax.rate : 0;
+
     const amount =
       currentService.included === "yes" ? 0 : parseFloat(currentService.amount);
     const taxAmount = amount * (taxRate / 100) || 0;
+
     const newService = {
       ...currentService,
       id: Date.now(),
-      amount,
+      amount: amount,
       taxRate,
       taxAmount,
       totalAmount: amount + taxAmount,
-      taxLabel: selectedTax ? selectedTax.label : "Non", 
+      taxLabel: selectedTax ? selectedTax.label : "Non",
     };
+
     setServices((prev) => [...prev, newService]);
+    setCurrentService({
+      included: "yes",
+      particulars: "",
+      amount: "",
+      taxType: "",
+    });
+  };
+
+  const handleClearService = () => {
     setCurrentService({
       included: "yes",
       particulars: "",
@@ -474,9 +498,15 @@ const CustomFinalize = () => {
     setServices((prev) => prev.filter((service) => service.id !== id));
   };
 
+  const handleSaveServices = () => {
+    console.log("Services saved:", services);
+    handleAddServiceClose();
+  };
+
   const handleAddFlight = (flightDetails) => {
     setFlights((prev) => [...prev, { ...flightDetails, id: Date.now() }]);
     console.log("Flight added:", flightDetails);
+    handleAddFlightClose();
   };
 
   const handleDayImageUpload = (dayId, file) => {
@@ -518,6 +548,121 @@ const CustomFinalize = () => {
     } else {
       alert("At least one day is required");
     }
+  };
+
+  const handlePreviewPdf = () => {
+    console.log("Preview PDF clicked");
+  };
+
+  const handleViewInvoice = () => {
+    console.log("View Invoice clicked");
+  };
+
+  const handleActionClick = (action) => {
+    switch (action) {
+      case "Finalize":
+        handleFinalizeOpen();
+        break;
+      case "Add Service":
+        handleAddServiceOpen();
+        break;
+      case "Email Quotation":
+        handleEmailOpen();
+        break;
+      case "Preview PDF":
+        handlePreviewPdf();
+        break;
+      case "Make Payment":
+        handlePaymentOpen();
+        break;
+      case "Add Flight":
+        handleAddFlightOpen();
+        break;
+      case "Transaction":
+        setOpenTransactionDialog(true);
+        break;
+      default:
+        console.log("Unknown action:", action);
+    }
+  };
+
+  const handleAddItinerary = () => {
+    const currentDays = days.length;
+    setItineraryDialog({
+      open: true,
+      mode: 'add',
+      day: currentDays + 1,
+      title: `Day ${currentDays + 1}`,
+      description: "",
+      id: null
+    });
+  };
+
+  const handleEditItinerary = (day, index) => {
+    setItineraryDialog({
+      open: true,
+      mode: 'edit',
+      day: index + 1,
+      title: day.title || `Day ${index + 1}`,
+      description: day.description || "",
+      id: day.id
+    });
+  };
+
+  const handleSaveItinerary = async () => {
+    const { mode, title, description, id } = itineraryDialog;
+    
+    if (!title.trim() || !description.trim()) {
+      setSnackbar({
+        open: true,
+        message: "Please fill in both title and description",
+        severity: "error"
+      });
+      return;
+    }
+
+    try {
+      if (mode === 'add') {
+        const newDay = {
+          id: Date.now(),
+          date: new Date().toLocaleDateString(),
+          title,
+          description,
+          image: null
+        };
+        
+        setDays(prev => [...prev, newDay]);
+      } else if (mode === 'edit') {
+        setDays(prev => 
+          prev.map(day => 
+            day.id === id ? { ...day, title, description } : day
+          )
+        );
+      }
+      
+      setItineraryDialog({ open: false, mode: 'add', day: null, title: "", description: "", id: null });
+      
+      setSnackbar({
+        open: true,
+        message: `Itinerary ${mode === 'add' ? 'added' : 'updated'} successfully`,
+        severity: "success"
+      });
+      
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: "Failed to save itinerary",
+        severity: "error"
+      });
+    }
+  };
+
+  const handleCloseItineraryDialog = () => {
+    setItineraryDialog({ open: false, mode: 'add', day: null, title: "", description: "", id: null });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   // UI Data
@@ -605,18 +750,8 @@ const CustomFinalize = () => {
     },
   ];
 
-  const actionHandlers = {
-    Finalize: () => setOpenFinalize(true),
-    "Add Service": () => setOpenAddService(true),
-    "Email Quotation": () => setOpenEmailDialog(true),
-    "Preview PDF": () => console.log("Preview PDF clicked"),
-    "Make Payment": () => setOpenPaymentDialog(true),
-    "Add Flight": () => setOpenAddFlight(true),
-    Transaction: () => setOpenTransactionDialog(true),
-  };
-
   return (
-    <Box>
+    <Box sx={{ backgroundColor: 'white', minHeight: '100vh' }}>
       {/* Action Buttons */}
       <Box
         display="flex"
@@ -632,7 +767,7 @@ const CustomFinalize = () => {
               !(a === "Transaction" && !isFinalized)
           )
           .map((a, i) => (
-            <Button key={i} variant="contained" onClick={actionHandlers[a]}>
+            <Button key={i} variant="contained" onClick={() => handleActionClick(a)}>
               {a}
             </Button>
           ))}
@@ -641,7 +776,7 @@ const CustomFinalize = () => {
             variant="contained"
             color="success"
             startIcon={<Receipt />}
-            onClick={() => console.log("Preview PDF clicked")}
+            onClick={handlePreviewPdf}
           >
             Generate Invoice
           </Button>
@@ -651,7 +786,7 @@ const CustomFinalize = () => {
             variant="contained"
             color="info"
             startIcon={<Visibility />}
-            onClick={() => console.log("View Invoice clicked")}
+            onClick={handleViewInvoice}
           >
             View Invoice
           </Button>
@@ -660,23 +795,7 @@ const CustomFinalize = () => {
 
       <Grid container spacing={2}>
         {/* Sidebar */}
-        <Grid
-          size={{ xs: 12, md: 3 }}
-          sx={{
-            borderRight: { md: "1px solid #ddd" },
-            pt: 3,
-            minHeight: "100vh",
-            bgcolor: "#f8f9fa",
-            textAlign: "center",
-          }}
-        >
-          <Chip
-            icon={<FormatQuoteIcon />}
-            label="Custom Quotation"
-            color="primary"
-            variant="outlined"
-            sx={{ mb: 3 }}
-          />
+        <Grid size={{ xs: 12, md: 3 }}>
           <Box sx={{ position: "sticky", top: 0 }}>
             <Card>
               <CardContent>
@@ -917,96 +1036,110 @@ const CustomFinalize = () => {
                   </Box>
                 </Box>
 
-                {/* Days Sections */}
-                {days.map((day) => (
-                  <Box
-                    key={day.id}
-                    mt={3}
-                    p={2}
-                    sx={{ border: "1px solid #e0e0e0", borderRadius: 1 }}
-                  >
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="space-between"
-                      mb={2}
-                    >
-                      <Typography variant="h6" fontWeight="bold">
-                        Day {day.id} ({day.date}) : {day.title}
-                      </Typography>
-                      {days.length > 1 && (
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleRemoveDay(day.id)}
+                {/* Itinerary Days Section */}
+                <Box mt={2}>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                        <Typography variant="h6">Itinerary Details</Typography>
+                        <Button 
+                          variant="outlined" 
+                          size="small" 
+                          onClick={handleAddItinerary}
+                          startIcon={<Add />}
                         >
-                          <Delete />
-                        </IconButton>
-                      )}
-                    </Box>
-
-                    <Box display="flex" alignItems="center" gap={2} mb={2}>
-                      <ImageIcon sx={{ color: "primary.main" }} />
-                      <Typography variant="body1">Add Image</Typography>
-                      <Button
-                        component="label"
-                        variant="outlined"
-                        size="small"
-                        startIcon={<AddCircleOutline />}
-                      >
-                        Upload Image
-                        <input
-                          type="file"
-                          hidden
-                          accept="image/*"
-                          onChange={(e) =>
-                            handleDayImageUpload(day.id, e.target.files[0])
-                          }
-                        />
-                      </Button>
-                    </Box>
-
-                    {day.image && (
-                      <Box mt={2} display="flex" alignItems="center" gap={2}>
-                        <Box
-                          component="img"
-                          src={day.image.preview}
-                          alt={`Day ${day.id}`}
-                          sx={{
-                            width: 100,
-                            height: 100,
-                            objectFit: "cover",
-                            borderRadius: 1,
-                            border: "1px solid #e0e0e0",
-                          }}
-                        />
-                        <Box>
-                          <Typography variant="body2" fontWeight="medium">
-                            {day.image.name}
-                          </Typography>
-                          <Button
-                            size="small"
-                            color="error"
-                            onClick={() => handleDayImageUpload(day.id, null)}
-                          >
-                            Remove
-                          </Button>
-                        </Box>
+                          Add Day
+                        </Button>
                       </Box>
-                    )}
-                  </Box>
-                ))}
+                      
+                      {days.length > 0 ? (
+                        days.map((day, index) => (
+                          <Box key={day.id} mb={2} p={1} sx={{ border: '1px dashed #ddd', borderRadius: 1 }}>
+                            <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+                              <Typography variant="subtitle1" fontWeight="bold">
+                                {day.title}
+                              </Typography>
+                              <Box>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleEditItinerary(day, index)}
+                                >
+                                  <Edit fontSize="small" />
+                                </IconButton>
+                                {days.length > 1 && (
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => handleRemoveDay(day.id)}
+                                  >
+                                    <Delete />
+                                  </IconButton>
+                                )}
+                              </Box>
+                            </Box>
+                            <Typography variant="body2" sx={{ mt: 1 }}>
+                              {day.description || "No description added."}
+                            </Typography>
+                            
+                            {/* Image Section */}
+                            <Box display="flex" alignItems="center" gap={2} mt={2}>
+                              <ImageIcon sx={{ color: "primary.main" }} />
+                              <Typography variant="body1">Add Image</Typography>
+                              <Button
+                                component="label"
+                                variant="outlined"
+                                size="small"
+                                startIcon={<AddCircleOutline />}
+                              >
+                                Upload Image
+                                <input
+                                  type="file"
+                                  hidden
+                                  accept="image/*"
+                                  onChange={(e) =>
+                                    handleDayImageUpload(day.id, e.target.files[0])
+                                  }
+                                />
+                              </Button>
+                            </Box>
 
-                {/* Add More Day Button */}
-                <Box mt={2} display="flex" justifyContent="center">
-                  <Button
-                    variant="outlined"
-                    startIcon={<AddCircleOutline />}
-                    onClick={handleAddDay}
-                    sx={{ textTransform: "none" }}
-                  >
-                    Add More Day
-                  </Button>
+                            {day.image && (
+                              <Box mt={2} display="flex" alignItems="center" gap={2}>
+                                <Box
+                                  component="img"
+                                  src={day.image.preview}
+                                  alt={`Day ${day.id}`}
+                                  sx={{
+                                    width: 100,
+                                    height: 100,
+                                    objectFit: "cover",
+                                    borderRadius: 1,
+                                    border: "1px solid #e0e0e0",
+                                  }}
+                                />
+                                <Box>
+                                  <Typography variant="body2" fontWeight="medium">
+                                    {day.image.name}
+                                  </Typography>
+                                  <Button
+                                    size="small"
+                                    color="error"
+                                    onClick={() => handleDayImageUpload(day.id, null)}
+                                  >
+                                    Remove
+                                  </Button>
+                                </Box>
+                              </Box>
+                            )}
+                          </Box>
+                        ))
+                      ) : (
+                        <Typography variant="body2" color="textSecondary" textAlign="center" py={2}>
+                          No itinerary added yet. Click "Add Day" to create your itinerary.
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </Card>
                 </Box>
               </Box>
 
@@ -1232,10 +1365,22 @@ const CustomFinalize = () => {
         </Grid>
       </Grid>
 
+      {/* Snackbar for notifications */}
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={3000} 
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
       {/* Dialogs */}
       <FinalizeDialog
         open={openFinalize}
-        onClose={() => setOpenFinalize(false)}
+        onClose={handleFinalizeClose}
         vendor={vendor}
         setVendor={setVendor}
         onConfirm={handleConfirm}
@@ -1248,26 +1393,14 @@ const CustomFinalize = () => {
         accountName={accountName}
         setAccountName={setAccountName}
         accountOptions={accountOptions}
-        onAddBankOpen={() => setOpenAddBankDialog(true)}
+        onAddBankOpen={handleAddBankOpen}
         onConfirm={handleBankConfirm}
       />
       <AddBankDialog
         open={openAddBankDialog}
-        onClose={() => {
-          setOpenAddBankDialog(false);
-          setNewBankDetails({
-            bankName: "",
-            branchName: "",
-            accountHolderName: "",
-            accountNumber: "",
-            ifscCode: "",
-            openingBalance: "",
-          });
-        }}
+        onClose={handleAddBankClose}
         newBankDetails={newBankDetails}
-        onNewBankChange={(field, value) =>
-          setNewBankDetails((prev) => ({ ...prev, [field]: value }))
-        }
+        onNewBankChange={handleNewBankChange}
         onAddBank={handleAddBank}
       />
       <EditDialog
@@ -1275,61 +1408,74 @@ const CustomFinalize = () => {
         onClose={handleEditClose}
         title={editDialog.title}
         value={editDialog.value}
-        onValueChange={(e) =>
-          setEditDialog((prev) => ({ ...prev, value: e.target.value }))
-        }
+        onValueChange={handleEditValueChange}
         onSave={handleEditSave}
       />
       <AddServiceDialog
         open={openAddService}
-        onClose={() => {
-          setOpenAddService(false);
-          setCurrentService({
-            included: "yes",
-            particulars: "",
-            amount: "",
-            taxType: "",
-          });
-        }}
+        onClose={handleAddServiceClose}
         currentService={currentService}
-        onServiceChange={(field, value) =>
-          setCurrentService((prev) => ({ ...prev, [field]: value }))
-        }
+        onServiceChange={handleServiceChange}
         services={services}
         onAddService={handleAddService}
-        onClearService={() =>
-          setCurrentService({
-            included: "yes",
-            particulars: "",
-            amount: "",
-            taxType: "",
-          })
-        }
+        onClearService={handleClearService}
         onRemoveService={handleRemoveService}
-        onSaveServices={() => {
-          console.log("Services saved:", services);
-          setOpenAddService(false);
-        }}
+        onSaveServices={handleSaveServices}
         taxOptions={taxOptions}
       />
       <AddFlightDialog
         open={openAddFlight}
-        onClose={() => setOpenAddFlight(false)}
+        onClose={handleAddFlightClose}
         onSave={handleAddFlight}
       />
       <EmailQuotationDialog
         open={openEmailDialog}
-        onClose={() => setOpenEmailDialog(false)}
+        onClose={handleEmailClose}
         customer={quotation.customer}
       />
       <MakePaymentDialog
         open={openPaymentDialog}
-        onClose={() => setOpenPaymentDialog(false)}
+        onClose={handlePaymentClose}
       />
       <TransactionSummaryDialog
         open={openTransactionDialog}
         onClose={() => setOpenTransactionDialog(false)}
       />
+
+      {/* Itinerary Dialog */}
+      <Dialog open={itineraryDialog.open} onClose={handleCloseItineraryDialog} maxWidth="md" fullWidth>
+        <DialogTitle>
+          {itineraryDialog.mode === 'add' ? 'Add' : 'Edit'} Itinerary - Day {itineraryDialog.day}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Title"
+            fullWidth
+            variant="outlined"
+            value={itineraryDialog.title}
+            onChange={(e) => setItineraryDialog({...itineraryDialog, title: e.target.value})}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            margin="dense"
+            label="Description"
+            fullWidth
+            variant="outlined"
+            multiline
+            rows={4}
+            value={itineraryDialog.description}
+            onChange={(e) => setItineraryDialog({...itineraryDialog, description: e.target.value})}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseItineraryDialog}>Cancel</Button>
+          <Button onClick={handleSaveItinerary} variant="contained">
+            {itineraryDialog.mode === 'add' ? 'Add' : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
