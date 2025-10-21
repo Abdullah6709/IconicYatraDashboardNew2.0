@@ -29,6 +29,9 @@ import HotelFinalize from "../Pages/Admin/Quotation/HotelQuotation/HotelFinalize
 import CustomFinalize from "../Pages/Admin/Quotation/CustomQuotation/CustomFinalize";
 import StaffEditForm from "../Pages/Admin/Staff/Form/StaffEditForm";
 import StaffViewForm from "../Pages/Admin/Staff/Form/StaffViewForm";
+import InvoiceCard from "../Pages/Admin/Invoice/InvoiceCard";
+import InvoiceForm from "../Pages/Admin/Invoice/Form/InvoiceForm";
+import InvoiceEditForm from "../Pages/Admin/Invoice/Form/InvoiceEditForm";
 const MainRoute = () => {
   const isAuthenticated = true;
 
@@ -82,6 +85,13 @@ const MainRoute = () => {
         <Route path="/staffform" element={<StaffForm />} />
         <Route path="/staff/staffeditform" element={<StaffEditForm />} />
         <Route path="/staff/viewstaffform" element={<StaffViewForm />} />
+
+
+        {/* Invoice Routing  */}
+
+        <Route path="/invoice" element={<InvoiceCard />} />
+        <Route path="/invoiceform" element={<InvoiceForm />} />
+        <Route path="/invoice/edit" element={<InvoiceEditForm />} />
 
         {/* <Route path="/customquotationstep5" element={<CustomQuotationStep5 />} /> */}
       </Routes>
