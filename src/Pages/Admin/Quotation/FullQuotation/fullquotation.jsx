@@ -95,16 +95,17 @@ const Section = ({ title, children }) => (
   </Paper>
 );
 
-const fullquotation = () => {
+const FullQuotation = () => {
   const [servicesList, setServicesList] = useState(data.services);
   const [openDialog, setOpenDialog] = useState(false);
   const [newService, setNewService] = useState("");
   const [showStep2, setShowStep2] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       clientName: "",
       tourType: "Domestic",
-      sector: "", 
+      sector: "",
       showCostPerAdult: false,
       services: [],
       adults: "",
@@ -516,6 +517,7 @@ const fullquotation = () => {
           </Button>
         </Box>
       </form>
+
       {/* Add New Service Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Add New Service</DialogTitle>
@@ -540,4 +542,4 @@ const fullquotation = () => {
   );
 };
 
-export default fullquotation;
+export default FullQuotation;

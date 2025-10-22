@@ -126,12 +126,23 @@ const InvoiceCard = () => {
   };
 
   const handleEditClick = (row) => {
-    navigate("/invoice/edit", { state: { invoiceData: row } });
+    navigate(`/invoice/edit/${row.id}`, { state: { invoiceData: row } });
   };
 
   const handleDeleteClick = (id) => {
     const updatedList = invoiceList.filter((item) => item.id !== id);
     setInvoiceList(updatedList);
+  };
+
+  const handleRowClick = (params, event) => {
+    // Check if the click was on the action column or its buttons
+    const isActionColumnClick = event.target.closest('[data-field="action"]');
+    const isButtonClick = event.target.closest('button');
+    
+    // Only navigate if not clicking on action column or buttons
+    if (!isActionColumnClick && !isButtonClick) {
+      navigate(`/invoice/generate/${params.row.id}`);
+    }
   };
 
   const columns = [
@@ -225,6 +236,7 @@ const InvoiceCard = () => {
               rowsPerPageOptions={[7, 25, 50, 100]}
               autoHeight
               disableRowSelectionOnClick
+              onRowClick={handleRowClick}
             />
           </Box>
         </Box>

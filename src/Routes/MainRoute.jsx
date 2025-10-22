@@ -32,6 +32,7 @@ import StaffViewForm from "../Pages/Admin/Staff/Form/StaffViewForm";
 import InvoiceCard from "../Pages/Admin/Invoice/InvoiceCard";
 import InvoiceForm from "../Pages/Admin/Invoice/Form/InvoiceForm";
 import InvoiceEditForm from "../Pages/Admin/Invoice/Form/InvoiceEditForm";
+import InvoiceGeneration from "../Pages/Admin/Invoice/Dialog/InvoicePdf/InvoiceGeneration";
 const MainRoute = () => {
   const isAuthenticated = true;
 
@@ -92,6 +93,7 @@ const MainRoute = () => {
         <Route path="/invoice" element={<InvoiceCard />} />
         <Route path="/invoiceform" element={<InvoiceForm />} />
         <Route path="/invoice/edit" element={<InvoiceEditForm />} />
+         <Route path="/invoice/generate/:id" element={<InvoiceGeneration />} />
 
         {/* <Route path="/customquotationstep5" element={<CustomQuotationStep5 />} /> */}
       </Routes>
