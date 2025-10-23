@@ -57,6 +57,8 @@ import {
   FormatQuote,
   Delete,
   Add,
+  Download,
+  Error,
 } from "@mui/icons-material";
 
 import EmailQuotationDialog from "../VehicleQuotation/Dialog/EmailQuotationDialog";
@@ -67,6 +69,7 @@ import AddBankDialog from "../VehicleQuotation/Dialog/AddBankDialog";
 import EditDialog from "../VehicleQuotation/Dialog/EditDialog";
 import AddServiceDialog from "../VehicleQuotation/Dialog/AddServiceDialog";
 import AddFlightDialog from "../HotelQuotation/Dialog/FlightDialog";
+import InvoicePDF from "./Dialog/PDF/Invoice";
 
 // Transaction Summary Dialog Component
 const TransactionSummaryDialog = ({ open, onClose }) => {
@@ -141,14 +144,102 @@ const TransactionSummaryDialog = ({ open, onClose }) => {
   );
 };
 
+// Invoice PDF Dialog Component
+const InvoicePdfDialog = ({ open, onClose, quotation, invoiceData }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleDownload = () => {
+    // Create a blob and download
+    const element = document.createElement("a");
+    const file = new Blob([document.getElementById('invoice-content').innerHTML], {type: 'text/html'});
+    element.href = URL.createObjectURL(file);
+    element.download = `invoice-${quotation.reference}.html`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
+      fullWidth
+      PaperProps={{ sx: { minHeight: "80vh", width: "90vw" } }}
+    >
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" component="div" fontWeight="bold">
+            Invoice - {quotation.reference}
+          </Typography>
+          <Box display="flex" gap={1}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handlePrint}
+              startIcon={<Visibility />}
+            >
+              Print
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleDownload}
+              startIcon={<Download />}
+            >
+              Download
+            </Button>
+          </Box>
+        </Box>
+      </DialogTitle>
+      <DialogContent sx={{ p: 0, position: 'relative' }}>
+        {loading && (
+          <Box 
+            display="flex" 
+            justifyContent="center" 
+            alignItems="center" 
+            height="100%"
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            bgcolor="rgba(255,255,255,0.8)"
+            zIndex={1}
+          >
+            <Box textAlign="center">
+              <CircularProgress size={40} />
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                Loading invoice...
+              </Typography>
+            </Box>
+          </Box>
+        )}
+
+        <Box sx={{ height: "70vh", width: "100%", overflow: 'auto' }} id="invoice-content">
+          <InvoicePDF invoiceData={invoiceData} />
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Close</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 const CustomFinalize = () => {
   // State
   const [activeInfo, setActiveInfo] = useState(null);
   const [openFinalize, setOpenFinalize] = useState(false);
-  const [openAddFlight, setOpenAddFlight] = useState(false); // Added missing state
+  const [openAddFlight, setOpenAddFlight] = useState(false);
   const [vendor, setVendor] = useState("");
   const [isFinalized, setIsFinalized] = useState(false);
   const [invoiceGenerated, setInvoiceGenerated] = useState(false);
+  const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -215,6 +306,8 @@ const CustomFinalize = () => {
       website: "https://www.iconicyatra.com",
     },
   });
+
+  const [invoiceData, setInvoiceData] = useState(null);
 
   const [editDialog, setEditDialog] = useState({
     open: false,
@@ -304,6 +397,57 @@ const CustomFinalize = () => {
       superior: "₹ 96,976",
     },
   ];
+
+  // Generate invoice data
+  const generateInvoiceData = () => {
+    return {
+      company: {
+        name: quotation.footer.company,
+        address: quotation.footer.address,
+        phone: quotation.footer.phone,
+        email: quotation.footer.email,
+        state: "9 - Uttar Pradesh",
+        gstin: "09EYCPK8832C1ZC",
+      },
+      customer: {
+        name: quotation.customer.name,
+        mobile: quotation.customer.phone,
+        email: quotation.customer.email,
+        state: "28 - Andhra Pradesh (Old)",
+        gstin: "28ABCDE1234F1Z2",
+      },
+      invoice: {
+        number: `INV-${quotation.reference}`,
+        date: new Date().toLocaleDateString("en-IN"),
+        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toLocaleDateString("en-IN"),
+        placeOfSupply: "9 - Uttar Pradesh",
+      },
+      items: [
+        {
+          id: 1,
+          particulars: "Hotel Booking Services",
+          hsnSac: "998314",
+          price: 2500,
+          amount: 2500,
+        },
+        {
+          id: 2,
+          particulars: "Transportation Services",
+          hsnSac: "996411",
+          price: 840,
+          amount: 840,
+        },
+      ],
+      summary: {
+        subTotal: 3340,
+        total: 3340,
+        received: 1500,
+        balance: 1840,
+      },
+      description: `Travel services for ${quotation.hotel.destination} - ${quotation.hotel.guests}`,
+      terms: "Payment due within 15 days. Thanks for choosing our services.",
+    };
+  };
 
   // Dialog handlers
   const handleEmailOpen = () => setOpenEmailDialog(true);
@@ -555,7 +699,35 @@ const CustomFinalize = () => {
   };
 
   const handleViewInvoice = () => {
-    console.log("View Invoice clicked");
+    setOpenInvoiceDialog(true);
+  };
+
+  // Generate Invoice Function
+  const handleGenerateInvoice = () => {
+    // Simulate invoice generation process
+    console.log("Generating invoice...");
+    
+    // Show loading state
+    setSnackbar({
+      open: true,
+      message: "Generating invoice...",
+      severity: "info"
+    });
+
+    // Generate invoice data
+    const generatedInvoiceData = generateInvoiceData();
+    setInvoiceData(generatedInvoiceData);
+
+    // Simulate API call delay
+    setTimeout(() => {
+      setInvoiceGenerated(true);
+      setOpenInvoiceDialog(true);
+      setSnackbar({
+        open: true,
+        message: "Invoice generated successfully!",
+        severity: "success"
+      });
+    }, 1500);
   };
 
   const handleActionClick = (action) => {
@@ -663,6 +835,10 @@ const CustomFinalize = () => {
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
+  };
+
+  const handleCloseInvoiceDialog = () => {
+    setOpenInvoiceDialog(false);
   };
 
   // UI Data
@@ -776,7 +952,7 @@ const CustomFinalize = () => {
             variant="contained"
             color="success"
             startIcon={<Receipt />}
-            onClick={handlePreviewPdf}
+            onClick={handleGenerateInvoice}
           >
             Generate Invoice
           </Button>
@@ -795,7 +971,7 @@ const CustomFinalize = () => {
 
       <Grid container spacing={2}>
         {/* Sidebar */}
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{xs:12, md:3}}>
           <Box sx={{ position: "sticky", top: 0 }}>
             <Card>
               <CardContent>
@@ -857,7 +1033,7 @@ const CustomFinalize = () => {
         </Grid>
 
         {/* Main Content */}
-        <Grid size={{ xs: 12, md: 9 }}>
+        <Grid size={{xs:12, md:9}}>
           <Card>
             <CardContent>
               <Box
@@ -1220,7 +1396,7 @@ const CustomFinalize = () => {
               {/* Policies */}
               <Grid container spacing={2} mt={1}>
                 {Policies.map((p, i) => (
-                  <Grid size={{ xs: 12 }} key={i}>
+                  <Grid size={{xs:12}} key={i}>
                     <Card variant="outlined">
                       <CardContent>
                         <Box
@@ -1440,6 +1616,14 @@ const CustomFinalize = () => {
       <TransactionSummaryDialog
         open={openTransactionDialog}
         onClose={() => setOpenTransactionDialog(false)}
+      />
+
+      {/* Invoice PDF Dialog */}
+      <InvoicePdfDialog
+        open={openInvoiceDialog}
+        onClose={handleCloseInvoiceDialog}
+        quotation={quotation}
+        invoiceData={invoiceData}
       />
 
       {/* Itinerary Dialog */}
