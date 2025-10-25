@@ -29,6 +29,7 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
+  Divider,
 } from "@mui/material";
 import {
   FormatQuote as FormatQuoteIcon,
@@ -70,7 +71,7 @@ import EditDialog from "../VehicleQuotation/Dialog/EditDialog";
 import AddServiceDialog from "../VehicleQuotation/Dialog/AddServiceDialog";
 import AddFlightDialog from "../HotelQuotation/Dialog/FlightDialog";
 import InvoicePDF from "./Dialog/PDF/Invoice";
-import QuotationPDFDialog from "./Dialog/PDF/PreviewPdf"; // Import the PDF dialog
+import QuotationPDFDialog from "./Dialog/PDF/PreviewPdf";
 
 // Transaction Summary Dialog Component
 const TransactionSummaryDialog = ({ open, onClose }) => {
@@ -150,7 +151,6 @@ const InvoicePdfDialog = ({ open, onClose, quotation, invoiceData }) => {
   const [loading, setLoading] = useState(false);
 
   const handleDownload = () => {
-    // Create a blob and download
     const element = document.createElement("a");
     const file = new Blob([document.getElementById('invoice-content').innerHTML], {type: 'text/html'});
     element.href = URL.createObjectURL(file);
@@ -241,7 +241,7 @@ const CustomFinalize = () => {
   const [isFinalized, setIsFinalized] = useState(false);
   const [invoiceGenerated, setInvoiceGenerated] = useState(false);
   const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
-  const [openPdfDialog, setOpenPdfDialog] = useState(false); // State for PDF dialog
+  const [openPdfDialog, setOpenPdfDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -307,6 +307,46 @@ const CustomFinalize = () => {
       address: "Office No 15, Bhawani Market Sec 27, Noida, Uttar Pradesh – 201301",
       website: "https://www.iconicyatra.com",
     },
+    hotelPricingData: [
+      {
+        destination: "Borong",
+        nights: "3 N",
+        standard: "Tempo Heritage Resort",
+        deluxe: "Tempo Heritage Resort",
+        superior: "Yovage The Aryan Regency",
+      },
+      {
+        destination: "Damthang",
+        nights: "2 N",
+        standard: "Tempo Heritage Resort",
+        deluxe: "Tempo Heritage Resort",
+        superior: "Yovage The Aryan Regency",
+      },
+      {
+        destination: "Quotation Cost",
+        nights: "-",
+        standard: "₹ 40,366",
+        deluxe: "₹ 440,829",
+        superior: "₹ 92,358",
+      },
+      {
+        destination: "IGST",
+        nights: "-",
+        standard: "₹ 2,018.3",
+        deluxe: "₹ 22,041.4",
+        superior: "₹ 4,617.9",
+      },
+      {
+        destination: "Total Quotation Cost",
+        nights: "5 N",
+        standard: "₹ 42,384",
+        deluxe: "₹ 462,870",
+        superior: "₹ 96,976",
+      },
+    ],
+    days: [
+      { id: 1, date: "11/09/2025", title: "About Day 1", description: "Arrival and check-in process" },
+    ],
   });
 
   const [invoiceData, setInvoiceData] = useState(null);
@@ -360,44 +400,6 @@ const CustomFinalize = () => {
     { value: "gst5", label: "GST 5%", rate: 5 },
     { value: "gst18", label: "GST 18%", rate: 18 },
     { value: "non", label: "Non", rate: 0 },
-  ];
-
-  const hotelPricingData = [
-    {
-      destination: "Borong",
-      nights: "3 N",
-      standard: "Tempo Heritage Resort",
-      deluxe: "Tempo Heritage Resort",
-      superior: "Yovage The Aryan Regency",
-    },
-    {
-      destination: "Damthang",
-      nights: "2 N",
-      standard: "Tempo Heritage Resort",
-      deluxe: "Tempo Heritage Resort",
-      superior: "Yovage The Aryan Regency",
-    },
-    {
-      destination: "Quotation Cost",
-      nights: "-",
-      standard: "₹ 40,366",
-      deluxe: "₹ 440,829",
-      superior: "₹ 92,358",
-    },
-    {
-      destination: "IGST",
-      nights: "-",
-      standard: "₹ 2,018.3",
-      deluxe: "₹ 22,041.4",
-      superior: "₹ 4,617.9",
-    },
-    {
-      destination: "Total Quotation Cost",
-      nights: "5 N",
-      standard: "₹ 42,384",
-      deluxe: "₹ 462,870",
-      superior: "₹ 96,976",
-    },
   ];
 
   // Generate invoice data
@@ -696,12 +698,14 @@ const CustomFinalize = () => {
     }
   };
 
-  // PDF Dialog Handlers
+  // PDF Dialog Handlers - FIXED VERSION
   const handlePreviewPdf = () => {
+    console.log("Opening PDF dialog...");
     setOpenPdfDialog(true);
   };
 
   const handleClosePdfDialog = () => {
+    console.log("Closing PDF dialog...");
     setOpenPdfDialog(false);
   };
 
@@ -711,21 +715,17 @@ const CustomFinalize = () => {
 
   // Generate Invoice Function
   const handleGenerateInvoice = () => {
-    // Simulate invoice generation process
     console.log("Generating invoice...");
     
-    // Show loading state
     setSnackbar({
       open: true,
       message: "Generating invoice...",
       severity: "info"
     });
 
-    // Generate invoice data
     const generatedInvoiceData = generateInvoiceData();
     setInvoiceData(generatedInvoiceData);
 
-    // Simulate API call delay
     setTimeout(() => {
       setInvoiceGenerated(true);
       setOpenInvoiceDialog(true);
@@ -738,6 +738,7 @@ const CustomFinalize = () => {
   };
 
   const handleActionClick = (action) => {
+    console.log("Action clicked:", action);
     switch (action) {
       case "Finalize":
         handleFinalizeOpen();
@@ -749,7 +750,7 @@ const CustomFinalize = () => {
         handleEmailOpen();
         break;
       case "Preview PDF":
-        handlePreviewPdf(); // This will open the PDF dialog
+        handlePreviewPdf();
         break;
       case "Make Payment":
         handlePaymentOpen();
@@ -1374,16 +1375,16 @@ const CustomFinalize = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {hotelPricingData.map((row, index) => (
+                      {quotation.hotelPricingData.map((row, index) => (
                         <TableRow
                           key={index}
                           sx={{
                             backgroundColor:
-                              index >= hotelPricingData.length - 2
+                              index >= quotation.hotelPricingData.length - 2
                                 ? "grey.50"
                                 : "inherit",
                             fontWeight:
-                              index === hotelPricingData.length - 1
+                              index === quotation.hotelPricingData.length - 1
                                 ? "bold"
                                 : "normal",
                           }}
@@ -1574,7 +1575,7 @@ const CustomFinalize = () => {
         accountType={accountType}
         setAccountType={setAccountType}
         accountName={accountName}
-        setAccountName={setAccountName}
+        setAccountName={accountName}
         accountOptions={accountOptions}
         onAddBankOpen={handleAddBankOpen}
         onConfirm={handleBankConfirm}
@@ -1633,12 +1634,14 @@ const CustomFinalize = () => {
         invoiceData={invoiceData}
       />
 
-      {/* Quotation PDF Dialog */}
-      <QuotationPDFDialog
-        open={openPdfDialog}
-        onClose={handleClosePdfDialog}
-        quotation={quotation}
-      />
+      {/* Preview PDF Dialog - Using imported component */}
+      {QuotationPDFDialog && (
+        <QuotationPDFDialog
+          open={openPdfDialog}
+          onClose={handleClosePdfDialog}
+          quotation={quotation}
+        />
+      )}
 
       {/* Itinerary Dialog */}
       <Dialog open={itineraryDialog.open} onClose={handleCloseItineraryDialog} maxWidth="md" fullWidth>
