@@ -61,16 +61,15 @@ import {
   Error,
 } from "@mui/icons-material";
 
-import EmailQuotationDialog from "../VehicleQuotation/Dialog/EmailQuotationDialog";
-import MakePaymentDialog from "../VehicleQuotation/Dialog/MakePaymentDialog";
+import EmailQuotationDialog from "../../VehicleQuotation/Dialog/EmailQuotationDialog";
+import MakePaymentDialog from "../../VehicleQuotation/Dialog/MakePaymentDialog";
 import FinalizeDialog from "./Dialog/FinalizeDialog";
 import HotelVendorDialog from "./Dialog/HotelVendor";
-import AddBankDialog from "../VehicleQuotation/Dialog/AddBankDialog";
-import EditDialog from "../VehicleQuotation/Dialog/EditDialog";
-import AddServiceDialog from "../VehicleQuotation/Dialog/AddServiceDialog";
-import AddFlightDialog from "../HotelQuotation/Dialog/FlightDialog";
+import AddBankDialog from "./Dialog/AddBankDialog";
+import EditDialog from "../../VehicleQuotation/Dialog/EditDialog";
+import AddServiceDialog from "../../VehicleQuotation/Dialog/AddServiceDialog";
+import AddFlightDialog from "../../HotelQuotation/Dialog/FlightDialog";
 import InvoicePDF from "./Dialog/PDF/Invoice";
-import QuotationPDFDialog from "./Dialog/PDF/PreviewPdf"; // Import the PDF dialog
 
 // Transaction Summary Dialog Component
 const TransactionSummaryDialog = ({ open, onClose }) => {
@@ -232,7 +231,7 @@ const InvoicePdfDialog = ({ open, onClose, quotation, invoiceData }) => {
   );
 };
 
-const CustomFinalize = () => {
+const FullQuotationFinalize = () => {
   // State
   const [activeInfo, setActiveInfo] = useState(null);
   const [openFinalize, setOpenFinalize] = useState(false);
@@ -241,7 +240,6 @@ const CustomFinalize = () => {
   const [isFinalized, setIsFinalized] = useState(false);
   const [invoiceGenerated, setInvoiceGenerated] = useState(false);
   const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
-  const [openPdfDialog, setOpenPdfDialog] = useState(false); // State for PDF dialog
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -696,13 +694,8 @@ const CustomFinalize = () => {
     }
   };
 
-  // PDF Dialog Handlers
   const handlePreviewPdf = () => {
-    setOpenPdfDialog(true);
-  };
-
-  const handleClosePdfDialog = () => {
-    setOpenPdfDialog(false);
+    console.log("Preview PDF clicked");
   };
 
   const handleViewInvoice = () => {
@@ -749,7 +742,7 @@ const CustomFinalize = () => {
         handleEmailOpen();
         break;
       case "Preview PDF":
-        handlePreviewPdf(); // This will open the PDF dialog
+        handlePreviewPdf();
         break;
       case "Make Payment":
         handlePaymentOpen();
@@ -1140,7 +1133,7 @@ const CustomFinalize = () => {
                     fontWeight="bold"
                     color="warning.main"
                   >
-                    Custom Quotation For {quotation.customer.name}
+                    Full Quotation For {quotation.customer.name}
                   </Typography>
                 </Box>
 
@@ -1633,13 +1626,6 @@ const CustomFinalize = () => {
         invoiceData={invoiceData}
       />
 
-      {/* Quotation PDF Dialog */}
-      <QuotationPDFDialog
-        open={openPdfDialog}
-        onClose={handleClosePdfDialog}
-        quotation={quotation}
-      />
-
       {/* Itinerary Dialog */}
       <Dialog open={itineraryDialog.open} onClose={handleCloseItineraryDialog} maxWidth="md" fullWidth>
         <DialogTitle>
@@ -1678,4 +1664,4 @@ const CustomFinalize = () => {
   );
 };
 
-export default CustomFinalize;
+export default FullQuotationFinalize;

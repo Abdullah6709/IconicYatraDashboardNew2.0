@@ -33,6 +33,7 @@ import InvoiceCard from "../Pages/Admin/Invoice/InvoiceCard";
 import InvoiceForm from "../Pages/Admin/Invoice/Form/InvoiceForm";
 import InvoiceEditForm from "../Pages/Admin/Invoice/Form/InvoiceEditForm";
 import InvoiceGeneration from "../Pages/Admin/Invoice/Dialog/InvoicePdf/InvoiceGeneration";
+import FullQuotationFinalize from "../Pages/Admin/Quotation/FullQuotation/Finalize/FullQuotationFinalize";
 const MainRoute = () => {
   const isAuthenticated = true;
 
@@ -64,6 +65,7 @@ const MainRoute = () => {
         <Route path="/vehiclefinalize" element={<VehicleFinalize />} />
         <Route path="/hotelfinalize" element={<HotelFinalize />} />
         <Route path="/customfinalize" element={<CustomFinalize />} />
+        <Route path="/fullfinalize" element={<FullQuotationFinalize />} />
 
         {/* Package Routing */}
         <Route path="/tourpackage" element={<PackageCard />} />
