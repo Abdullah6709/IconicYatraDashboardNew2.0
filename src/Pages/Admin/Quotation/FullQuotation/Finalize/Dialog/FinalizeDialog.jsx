@@ -1,152 +1,169 @@
 import React, { useState } from "react";
 import {
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
-  Button,
-  Typography,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
+  DialogContent,
+  DialogTitle,
   Box,
-  TextField,
-  Checkbox,
+  Grid,
+  Typography,
+  Button,
   Divider,
+  Radio,
 } from "@mui/material";
+import { Formik, Form } from "formik";
 
-const SelectHotelVendorDialog = ({ open, onClose }) => {
-  const [vendorType, setVendorType] = useState("single");
-  const [vendors, setVendors] = useState([
-    { id: 1, name: "Hotel Palm Bliss Barsey (2N)", same: false, vendorName: "" },
-    { id: 2, name: "Tempo Heritage Resort Chungthang (2N)", same: false, vendorName: "" },
-  ]);
+const quotationOptions = [
+  {
+    label: "Standard",
+    hotel: "Sikkim resto Aritar(5N)",
+    cost: "₹ 60,900",
+  },
+  {
+    label: "Deluxe",
+    hotel: "Sikkim resto Aritar(5N)",
+    cost: "₹ 63,100",
+  },
+  {
+    label: "Superior",
+    hotel: "Sikkim resto Aritar(5N)",
+    cost: "₹ 55,400",
+  },
+];
 
-  const handleVendorChange = (id, value) => {
-    setVendors((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, vendorName: value } : v))
-    );
-  };
+const FinalizeDialog = ({ open, onClose, onConfirm }) => {
+  const [selectedOption, setSelectedOption] = useState("");
 
-  const handleSameChange = (id, checked) => {
-    if (checked) {
-      const sourceVendor = vendors.find((v) => v.id === id)?.vendorName || "";
-      setVendors((prev) =>
-        prev.map((v) => (v.id !== id ? { ...v, vendorName: sourceVendor } : v))
-      );
-    }
-  };
-
-  const handleConfirm = () => {
-    console.log("Vendor selection:", { vendorType, vendors });
-    onClose();
+  const handleSubmit = (values) => {
+    console.log("Finalized quotation:", values);
+    onConfirm(values);
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: 600, color: "#2196f3" }}>
-        Select Hotel Vendor
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle sx={{ fontWeight: 600, color: "#1976d2" }}>
+        Finalize Quotation
       </DialogTitle>
-
-      <DialogContent dividers>
-        {/* Vendor Type */}
-        <Typography sx={{ fontWeight: 600, mb: 1 }}>
-          <span style={{ color: "red" }}>*</span> Vendor Type
-        </Typography>
-        <RadioGroup
-          row
-          value={vendorType}
-          onChange={(e) => setVendorType(e.target.value)}
-        >
-          <FormControlLabel value="single" control={<Radio />} label="Single Vendor" />
-          <FormControlLabel value="multiple" control={<Radio />} label="Multiple Vendor" />
-        </RadioGroup>
-
-        {/* Single Vendor Layout */}
-        {vendorType === "single" && (
-          <Box mt={2}>
-            <Typography sx={{ fontWeight: 600, mb: 1 }}>
-              <span style={{ color: "red" }}>*</span> Hotel Vendor
-            </Typography>
-            <Box display="flex" alignItems="center" gap={1}>
-              <TextField
-                size="small"
-                fullWidth
-                placeholder="Hotel Vendor Name"
-              />
-              <Typography variant="body2" color="primary" sx={{ cursor: "pointer" }}>
-                Show All
-              </Typography>
-            </Box>
-
-            <Box mt={1}>
+      <Formik
+        initialValues={{ quotation: "" }}
+        onSubmit={handleSubmit}
+      >
+        {({ setFieldValue, values }) => (
+          <Form>
+            <DialogContent>
               <Typography
-                variant="body2"
-                color="primary"
-                sx={{ cursor: "pointer" }}
+                variant="subtitle1"
+                sx={{ fontWeight: 600, mb: 2 }}
+                color="text.primary"
               >
-                Add New
+                <span style={{ color: "red" }}>*</span> Quotation
               </Typography>
-            </Box>
-          </Box>
+
+              <Grid container spacing={2}>
+                {quotationOptions.map((option) => {
+                  const isSelected = selectedOption === option.label;
+                  return (
+                    <Grid size={{xs:12, md:4}} key={option.label}>
+                      <Box
+                        onClick={() => {
+                          setSelectedOption(option.label);
+                          setFieldValue("quotation", option.label);
+                        }}
+                        sx={{
+                          border: isSelected
+                            ? "2px solid #ff9800"
+                            : "1px solid #ccc",
+                          borderRadius: 1,
+                          p: 2,
+                          cursor: "pointer",
+                          textAlign: "center",
+                          transition: "0.2s",
+                          "&:hover": {
+                            borderColor: "#1976d2",
+                          },
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Radio
+                            checked={isSelected}
+                            value={option.label}
+                            name="quotation"
+                            sx={{
+                              color: "#ff9800",
+                              "&.Mui-checked": { color: "#ff9800" },
+                            }}
+                          />
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              color: "#ff9800",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {option.label}
+                          </Typography>
+                        </Box>
+
+                        <Divider sx={{ my: 1, borderColor: "#ff9800" }} />
+
+                        <Typography
+                          variant="body2"
+                          sx={{ mb: 1, color: "#1976d2" }}
+                        >
+                          » {option.hotel}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Total Cost:{" "}
+                          <span style={{ fontWeight: 600 }}>
+                            {option.cost}
+                          </span>
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </DialogContent>
+
+            <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                type="submit"
+                disabled={!selectedOption}
+                sx={{
+                  textTransform: "none",
+                  backgroundColor: selectedOption ? "#64b5f6" : "#bbdefb",
+                  "&:hover": {
+                    backgroundColor: "#2196f3",
+                  },
+                }}
+              >
+                Confirm
+              </Button>
+              <Button
+                variant="contained"
+                onClick={onClose}
+                sx={{
+                  backgroundColor: "#f57c00",
+                  textTransform: "none",
+                  "&:hover": { backgroundColor: "#ef6c00" },
+                }}
+              >
+                Cancel
+              </Button>
+            </DialogActions>
+          </Form>
         )}
-
-        {/* Multiple Vendor Layout */}
-        {vendorType === "multiple" && (
-          <Box mt={2}>
-            <Typography sx={{ fontWeight: 600, color: "#f57c00" }}>Deluxe</Typography>
-            <Divider sx={{ mb: 2 }} />
-
-            {vendors.map((hotel) => (
-              <Box key={hotel.id} mb={2}>
-                <Typography sx={{ fontWeight: 600 }}>
-                  <span style={{ color: "red" }}>*</span> {hotel.name}
-                </Typography>
-
-                <Box display="flex" alignItems="center" gap={1} mt={0.5}>
-                  <Checkbox
-                    size="small"
-                    checked={hotel.same}
-                    onChange={(e) =>
-                      handleSameChange(hotel.id, e.target.checked)
-                    }
-                  />
-                  <Typography variant="body2">Same</Typography>
-                </Box>
-
-                <TextField
-                  size="small"
-                  fullWidth
-                  placeholder="Hotel Vendor Name"
-                  value={hotel.vendorName}
-                  onChange={(e) => handleVendorChange(hotel.id, e.target.value)}
-                />
-              </Box>
-            ))}
-          </Box>
-        )}
-      </DialogContent>
-
-      <DialogActions sx={{ justifyContent: "center", p: 2 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleConfirm}
-          sx={{ minWidth: 100 }}
-        >
-          Confirm
-        </Button>
-        <Button
-          variant="contained"
-          color="warning"
-          onClick={onClose}
-          sx={{ minWidth: 100 }}
-        >
-          Cancel
-        </Button>
-      </DialogActions>
+      </Formik>
     </Dialog>
   );
 };
 
-export default SelectHotelVendorDialog;
+export default FinalizeDialog;

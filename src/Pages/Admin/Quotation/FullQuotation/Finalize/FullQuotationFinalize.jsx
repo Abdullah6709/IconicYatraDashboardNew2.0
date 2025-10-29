@@ -59,6 +59,7 @@ import {
   Add,
   Download,
   Error,
+  Close,
 } from "@mui/icons-material";
 
 import EmailQuotationDialog from "../../VehicleQuotation/Dialog/EmailQuotationDialog";
@@ -70,6 +71,7 @@ import EditDialog from "../../VehicleQuotation/Dialog/EditDialog";
 import AddServiceDialog from "../../VehicleQuotation/Dialog/AddServiceDialog";
 import AddFlightDialog from "../../HotelQuotation/Dialog/FlightDialog";
 import InvoicePDF from "./Dialog/PDF/Invoice";
+import ConfirmationVoucher from "../Finalize/Dialog/PDF/PreviewPdf";
 
 // Transaction Summary Dialog Component
 const TransactionSummaryDialog = ({ open, onClose }) => {
@@ -140,6 +142,71 @@ const TransactionSummaryDialog = ({ open, onClose }) => {
           </Table>
         </TableContainer>
       </DialogContent>
+    </Dialog>
+  );
+};
+
+// Preview PDF Dialog Component
+const PreviewPdfDialog = ({ open, onClose, quotation, services, flights, days }) => {
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownload = () => {
+    // Create a blob and download
+    const element = document.createElement("a");
+    const file = new Blob([document.getElementById('preview-content').innerHTML], {type: 'text/html'});
+    element.href = URL.createObjectURL(file);
+    element.download = `confirmation-voucher-${quotation.reference}.html`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
+      fullWidth
+      PaperProps={{ sx: { minHeight: "80vh", width: "90vw" } }}
+    >
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" component="div" fontWeight="bold">
+            Preview PDF - {quotation.reference}
+          </Typography>
+          <Box display="flex" gap={1}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handlePrint}
+              startIcon={<Visibility />}
+            >
+              Print
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleDownload}
+              startIcon={<Download />}
+            >
+              Download
+            </Button>
+            <IconButton onClick={onClose}>
+              <Close />
+            </IconButton>
+          </Box>
+        </Box>
+      </DialogTitle>
+      <DialogContent sx={{ p: 0, position: 'relative' }}>
+        <Box sx={{ height: "70vh", width: "100%", overflow: 'auto' }} id="preview-content">
+          <ConfirmationVoucher />
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Close</Button>
+      </DialogActions>
     </Dialog>
   );
 };
@@ -240,6 +307,7 @@ const FullQuotationFinalize = () => {
   const [isFinalized, setIsFinalized] = useState(false);
   const [invoiceGenerated, setInvoiceGenerated] = useState(false);
   const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
+  const [openPreviewPdf, setOpenPreviewPdf] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -473,6 +541,16 @@ const FullQuotationFinalize = () => {
   const handleAddFlightOpen = () => setOpenAddFlight(true);
   const handleAddFlightClose = () => setOpenAddFlight(false);
 
+  const handlePreviewPdf = () => {
+    console.log("Opening Preview PDF dialog");
+    setOpenPreviewPdf(true);
+  };
+  
+  const handleClosePreviewPdf = () => {
+    console.log("Closing Preview PDF dialog");
+    setOpenPreviewPdf(false);
+  };
+
   const handleEditOpen = (
     field,
     value,
@@ -694,10 +772,6 @@ const FullQuotationFinalize = () => {
     }
   };
 
-  const handlePreviewPdf = () => {
-    console.log("Preview PDF clicked");
-  };
-
   const handleViewInvoice = () => {
     setOpenInvoiceDialog(true);
   };
@@ -731,6 +805,7 @@ const FullQuotationFinalize = () => {
   };
 
   const handleActionClick = (action) => {
+    console.log("Action clicked:", action);
     switch (action) {
       case "Finalize":
         handleFinalizeOpen();
@@ -1616,6 +1691,16 @@ const FullQuotationFinalize = () => {
       <TransactionSummaryDialog
         open={openTransactionDialog}
         onClose={() => setOpenTransactionDialog(false)}
+      />
+      
+      {/* Preview PDF Dialog */}
+      <PreviewPdfDialog
+        open={openPreviewPdf}
+        onClose={handleClosePreviewPdf}
+        quotation={quotation}
+        services={services}
+        flights={flights}
+        days={days}
       />
 
       {/* Invoice PDF Dialog */}
