@@ -34,7 +34,7 @@ import InvoiceForm from "../Pages/Admin/Invoice/Form/InvoiceForm";
 import InvoiceEditForm from "../Pages/Admin/Invoice/Form/InvoiceEditForm";
 import InvoiceGeneration from "../Pages/Admin/Invoice/Dialog/InvoicePdf/InvoiceGeneration";
 import FullQuotationFinalize from "../Pages/Admin/Quotation/FullQuotation/Finalize/FullQuotationFinalize";
-import CompanyProfile from "../Pages/Admin/Profile/Profile";
+import CompanyProfile from "../Pages/Admin/Profile/CompanyProfile";
 const MainRoute = () => {
   const isAuthenticated = true;
 
