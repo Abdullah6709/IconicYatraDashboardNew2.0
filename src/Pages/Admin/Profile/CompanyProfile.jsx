@@ -33,6 +33,7 @@ import WorkIcon from "@mui/icons-material/Work";
 
 // Import the BankingStatus component
 import BankingStatus from "./BankingStatus";
+import TermsCondition from "./TermsCondition";
 
 const CompanyProfile = () => {
   const [selected, setSelected] = useState("Company Profile");
@@ -291,6 +292,10 @@ const CompanyProfile = () => {
   const renderMainContent = () => {
     if (selected === "Banking & Status") {
       return <BankingStatus />;
+    }
+
+    if (selected == "Terms & Condition"){
+      return <TermsCondition />;
     }
 
     return (
